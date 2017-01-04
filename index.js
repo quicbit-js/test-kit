@@ -3,20 +3,20 @@
 // collects test argument and executes them later (on timeout) according to whether 'only'
 // was called or not.
 class TestRunner {
-    constructor(enrich_fns) {
+    constructor(test_fn, enrich_fns) {
         this.args = []
         this.only_called = false
         this.running = false
+        this.test_fn = test_fn
         this.enrich_fns = Object.assign({}, enrich_fns)
     }
     run() {
-        var tap = require('tap')
         var self = this
         setTimeout(function () {
             if(this.running) { throw Error('already running') }
             self.running = true
             self.args.forEach(function (a) {
-                tap.test(...enrich_test_arguments(a, self.enrich_fns))
+                self.test_fn(...enrich_test_arguments(a, self.enrich_fns))
             })
         })
     }
@@ -55,26 +55,6 @@ function enrich_t(fn, enrich_fns) {
         funcnames.forEach(n => { t[n] = enrich_fns[n](t) })
         fn(t)
     }
-}
-
-// property/function transforms applied to the test object passed into each test:
-//
-//      test( 'my test', function(t) {...} )   // applied to the 't' object
-//
-let DEFAULT_ENRICH_FNS = {
-    // return a simple description of a function test: inputs -> outputs
-    desc: () => function(s, inp, out) {
-        return s + ': ' + parens(inp) + ' -expect-> ' + parens([out])
-    },
-    table: () => function(data) {
-        return require('test-table').from_data(data)
-    },
-    str:    () => str,
-    lines:  () => text_lines,
-    hector: () => hector,
-    sum:    () => sum,
-    count:  () => count,
-    type:   () => type
 }
 
 // Return a string loosely based on JSON.stringify, but with single quotes and fewer escapes.
@@ -230,33 +210,46 @@ function hector(names) {
     return ret
 }
 
-function testfn(eng, enrich_fns) {
+function testfn(name_or_fn, enrich_fns) {
     let ret
-    enrich_fns = Object.assign({}, DEFAULT_ENRICH_FNS, enrich_fns)
-    switch(eng) {
-        case 'tape':
-            let test_orig = require('tape').test
-            delete enrich_fns.throws
-            ret =      function() { return      test_orig(...enrich_test_arguments(arguments, enrich_fns )) }
-            ret.only = function() { return test_orig.only(...enrich_test_arguments(arguments, enrich_fns )) }
-            break
-        case 'tap':
-            let runner = new TestRunner(enrich_fns)
-            ret = function() { runner.addTest(arguments, false) }
-            ret.only = function() { runner.addTest(arguments, true) }
-            runner.run()
-            break
-        default:
-            throw Error('unknown test engine: ' + eng + ".  Choose 'tap' or 'tape'")
+
+    let test_orig = name_or_fn
+    if(typeof name_or_fn === 'string') {
+        test_orig = require(name_or_fn).test || err(name_or_fn + ' has no test function')
+    }
+    if(test_orig.only) {
+        ret =      function() { return      test_orig(...enrich_test_arguments(arguments, enrich_fns )) }
+        ret.only = function() { return test_orig.only(...enrich_test_arguments(arguments, enrich_fns )) }
+    } else {
+        let runner = new TestRunner(test_orig, enrich_fns)
+        ret =      function() { runner.addTest(arguments, false) }
+        ret.only = function() { runner.addTest(arguments, true) }
+        runner.run()
     }
     return ret
 }
 
-// wrap and enrich tap.test
-function tap_test(enrich_fns) {
+// property/function transforms applied to the test object passed into each test:
+//
+//      test( 'my test', function(t) {...} )   // applied to the 't' object
+//
+// return a simple description of a function test: inputs -> outputs
+testfn.DEFAULT_FUNCTIONS = {
+    desc: () => function(s, inp, out) {
+        return s + ': ' + parens(inp) + ' -expect-> ' + parens([out])
+    },
+    table: () => function(data) {
+        return require('test-table').from_data(data)
+    },
+    str:    () => str,
+    lines:  () => text_lines,
+    hector: () => hector,
+    sum:    () => sum,
+    count:  () => count,
+    type:   () => type
 }
 
-module.exports.test = testfn
-module.exports.tap = testfn('tap', {})
-module.exports.tape = testfn('tape', {})
+module.exports = testfn
+module.exports.tap =  function(test_fns) { return testfn('tap',  Object.assign({}, testfn.DEFAULT_FUNCTIONS, test_fns)) }
+module.exports.tape = function(test_fns) { return testfn('tape', Object.assign({}, testfn.DEFAULT_FUNCTIONS, test_fns)) }
 

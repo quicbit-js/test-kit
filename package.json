@@ -12,7 +12,7 @@
     "test-table": "^0.0.1"
   },
   "scripts": {
-    "test": "tape test.js"
+    "test": "tape test-*.js"
   },
   "keywords": [
     "test",

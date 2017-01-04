@@ -1,8 +1,8 @@
 'use strict'
 
-let test = require('.').tape
+let test = require('.').tape()   // or use require('.').tap
 
-test('ttk: lines', (t) => {
+test('test-defaults: lines', (t) => {
     t.plan(6)
     let lines = `
         
@@ -43,7 +43,7 @@ test('ttk: lines', (t) => {
     t.deepEqual(t.lines('\n\n'), [])
 })
 
-test('ttk: hector', (t) => {
+test('test-defaults: hector', (t) => {
     let args = [
         [null,      5,  'a'],
         [undefined, 7,  'b'],
@@ -70,7 +70,7 @@ test('ttk: hector', (t) => {
     })
 })
 
-test('ttk: count', function(t) {
+test('test-defaults: count', function(t) {
     let tbl = t.table([
         [ 's',           'v',      'exp' ],
         [ '',            'x',       0  ],
@@ -90,7 +90,7 @@ test('ttk: count', function(t) {
     })
 })
 
-test('ttk: sum', (t) => {
+test('test-defaults: sum', (t) => {
     let tbl = t.table([
         [ 'a',                          'prop',             'exp' ],
         [ [],                            null,                  0  ],
@@ -112,7 +112,7 @@ test('ttk: sum', (t) => {
     })
 })
 
-test('ttk: str', (t) => {
+test('test-defaults: str', (t) => {
     let tbl = t.table([
         [ 'v',              'exp' ],
         [  1,               '1' ],
@@ -126,17 +126,5 @@ test('ttk: str', (t) => {
     t.plan(tbl.length)
     tbl.rows.forEach((r) => {
         t.equal(t.str(r.v), r.exp, t.desc('str', [r.v], r.exp))
-    })
-})
-
-test('ttk: throws', (t) => {
-    let tbl = t.table([
-        ['msg', 'expr'],
-        ['abc', /bc/],
-    ])
-
-    t.plan(tbl.length)
-    tbl.rows.forEach((r) => {
-        t.throws(() => { throw Error(r.msg) }, r.expr, t.desc('throws', [r.msg, r.expr], true) )
     })
 })
