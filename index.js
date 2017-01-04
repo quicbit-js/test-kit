@@ -137,11 +137,11 @@ function err(msg) { throw Error(msg) }
 
 function type(v) {
     let ret = Object.prototype.toString.call(v)
-    return ret.substring(8, ret.length-1)
+    return ret.substring(8, ret.length-1).toLowerCase()
 }
 
 function countstr(s, v) {
-    type(v) === 'String' || err('value should be a string: ' + type(v))
+    type(v) === 'string' || err('value should be a string: ' + type(v))
     v.length > 0 || err('cannot count zero-length string')
 
     let c=0;
@@ -156,11 +156,11 @@ function countstr(s, v) {
 
 function countbuf(b, v) {
     switch(type(v)) {
-        case 'String':
+        case 'string':
             v.length === 1 || err('long strings not supported')
             v = v.charCodeAt(0)
             break
-        case 'Number':
+        case 'number':
             break
         default:
             throw Error('type not handled: ' + type(v))
@@ -172,11 +172,11 @@ function countbuf(b, v) {
 
 function count(s, v) {
     switch(type(s)) {
-        case 'Uint8Array':
+        case 'uint8array':
             return countbuf(s, v)
-        case 'String':
+        case 'string':
             return countstr(s, v)
-        case 'Array':
+        case 'array':
             for(var i=0,c=0; i<s.length; i++) { if(s[i] === v) c++ }
             return c
         default:

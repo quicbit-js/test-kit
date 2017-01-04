@@ -128,3 +128,21 @@ test('test-defaults: str', (t) => {
         t.equal(t.str(r.v), r.exp, t.desc('str', [r.v], r.exp))
     })
 })
+
+test('test-defaults: type', (t) => {
+    let tbl = t.table([
+        [ 'v',              'exp' ],
+        [  1,               'number' ],
+        [  null,            'null' ],
+        [  undefined,       'undefined'],
+        [  [1,2],           'array'],
+        [  {a:1},           'object' ],
+        [  () => 1,         'function' ],
+    ])
+
+    t.plan(tbl.length)
+    tbl.rows.forEach((r) => {
+        t.equal(t.type(r.v), r.exp, t.desc('type', [r.v], r.exp))
+    })
+})
+
