@@ -43,7 +43,7 @@ available in tape, but we make it available in node-tap as well.
 
 The functions described below are available in the t callback argument.
 Most of these functions are tiny and can be understood by looking
-at the index.js file.  
+at the index.js file:  
 
     testfn.DEFAULT_FUNCTIONS = {
         desc: () => function(s, inp, out) {
@@ -59,6 +59,8 @@ at the index.js file.
         count:  () => count,
         type:   () => type
     }
+    
+... or looking at usage in test-defaults.js.
     
 You can define your own test functions by passing them into tape() or tap():
 
@@ -191,6 +193,21 @@ Return the value type using Object.prototype.toString
         Object.prototype.toString.call(v)
         return ret.substring(8, ret.length-1)
     }
+    
+From test-defaults.js:
+
+    v(alue) -> exp(ected output) 
+
+    let tbl = t.table([
+        [ 'v',              'exp' ],
+        [  1,               'number' ],
+        [  null,            'null' ],
+        [  undefined,       'undefined'],
+        [  [1,2],           'array'],
+        [  {a:1},           'object' ],
+        [  () => 1,         'function' ],
+    ])
+    
 
 ## test.only()
 
