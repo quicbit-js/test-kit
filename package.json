@@ -1,0 +1,25 @@
+{
+  "name": "test-kit",
+  "version": "0.0.1",
+  "description": "functions for writing concise tests",
+  "homepage": "https://github.com/quicbit-js/test-kit",
+  "url": "https://github.com/quicbit-js/test-kit/issues",
+  "email": "support@quicbit.com",
+  "repository": "quicbit-js/test-kit",
+  "dependencies": {
+    "tap": "^5.7.0",
+    "tape": "^4.6.2",
+    "test-table": "^0.0.1"
+  },
+  "scripts": {
+    "test": "tape test.js"
+  },
+  "keywords": [
+    "test",
+    "tap",
+    "tape",
+    "data-driven"
+  ],
+  "author": "Matthew Voss",
+  "license": "ISC"
+}
