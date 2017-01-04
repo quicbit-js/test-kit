@@ -162,15 +162,16 @@ Easy capture of formatted text into string-array.
 
 Given a string, return an array of strings trimming start and end blank lines but preserving
 interim blank lines and relative space-indentation.  (using first space-indented line as the minimum indent).
-t.lines(`
 
-        some text
-
-        that is formatted
-            with some indentation
-        on some lines
-
-)
+    t.lines(`
+    
+            some text
+    
+            that is formatted
+                with some indentation
+            on some lines
+    
+    `)
 
 ... returns:
 
