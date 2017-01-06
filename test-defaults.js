@@ -70,7 +70,7 @@ test('test-defaults: hector', (t) => {
     })
 })
 
-test('test-defaults: count', function(t) {
+test('test-defaults: count len = 1', function(t) {
     let tbl = t.table([
         [ 's',           'v',      'exp' ],
         [ '',            'x',       0  ],
@@ -87,6 +87,22 @@ test('test-defaults: count', function(t) {
         let vcode = r.v.charCodeAt(0)
         t.equal(t.count(Buffer.from(r.s), vcode), r.exp, t.desc('count buf', [r.s, vcode], r.exp))
         t.equal(t.count(r.s.split(''), r.v), r.exp, t.desc('count arr', [r.s, r.v], r.exp))
+    })
+})
+
+test('test-defaults: count len > 1', function(t) {
+    let tbl = t.table([
+        [ 's',           'v',      'exp' ],
+        [ '',            '10',      0  ],
+        [ '10',          '10',      1  ],
+        [ '101',         '10',      1  ],
+        [ '1010',        '10',      2  ],
+        [ '0100101001',  '10',      3  ],
+    ])
+
+    t.plan(tbl.length)
+    tbl.rows.forEach((r) => {
+        t.equal(t.count(r.s, r.v), r.exp, t.desc('count str', [r.s, r.v], r.exp))
     })
 })
 

@@ -149,7 +149,7 @@ function countstr(s, v) {
         let len = s.length
         for(let i=0; i<len; i++) { if(s[i] === v) c++ }
     } else {
-        for(let i=0; i !== -1; i = s.indexOf(v, i)) { c++ }
+        for(let i=s.indexOf(v); i !== -1; i=s.indexOf(v, i+1)) { c++ }
     }
     return c
 }
