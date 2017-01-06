@@ -1,6 +1,6 @@
 {
   "name": "test-kit",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "functions for writing concise tests",
   "homepage": "https://github.com/quicbit-js/test-kit",
   "url": "https://github.com/quicbit-js/test-kit/issues",
