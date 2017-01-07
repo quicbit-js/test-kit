@@ -46,18 +46,15 @@ Most of these functions are tiny and can be understood by looking
 at the index.js file:  
 
     testfn.DEFAULT_FUNCTIONS = {
-        desc: () => function(s, inp, out) {
-            return s + ': ' + parens(inp) + ' -expect-> ' + parens([out])
-        },
-        table: () => function(data) {
-            return require('test-table').from_data(data)
-        },
-        str:    () => str,
-        lines:  () => text_lines,
-        hector: () => hector,
-        sum:    () => sum,
-        count:  () => count,
-        type:   () => type
+        count:       () => count,
+        desc:        () => desc,
+        hector:      () => hector,
+        lines:       () => text_lines,
+        str:         () => str,
+        sum:         () => sum,
+        table:       () => (data) => { return require('test-table').from_data(data) },
+        tableAssert: () => tableAssert,
+        type:        () => type
     }
     
 ... or looking at usage in test-defaults.js.
@@ -82,9 +79,9 @@ functions to allow full flexibility:
 Creates a simple table for data-driven testing:
 
     var test = require('test-kit)
-    var match = require('my-super-matcher-thingy')
+    var match = require('my-super-match')
     
-    test('test assertions', function(t) {
+    test('test super-match', function(t) {
        var tbl = t.table([
           [ 'str', 'match', 'expect' ],
           [ 'foo', /.*o/,   true     ],
@@ -101,10 +98,31 @@ Creates a simple table for data-driven testing:
 Representing data in tabular form improves brevity and helps highlight test variations and 
 can be very effective at showing expected behavior.
 
+## t.tableAssert()
+
+If your test table adheres to the convention where the first columns
+are inputs and the last column is expected output (should deep-equal output)
+of a single function test, 
+then you can write the above test even more concisely as:
+
+    var test = require('test-kit)
+    
+    test('test super-match', function(t) {
+       var tbl = t.tableAssert([
+          [ 'str', 'match', 'expect' ],
+          [ 'foo', /.*o/,   true     ],
+          [ '1234', '34',   true     ],
+          [ 'barry', 'rrr', false    ],
+       ], require('my-super-match' )        // the function to assert
+    })
+
+
 ## t.desc()   "describe"
 
 Create **desc**riptive assertion messages with expected input/output:
 
+    desc(label, inputs, expected_output)
+    
 For example, the following test:
 
     var test = require('test-kit').tape
@@ -123,12 +141,22 @@ For example, the following test:
         })
     })
 
-prints out:
+prints:
 
     # ftree: checkbase
     ok 1 checkbase: ('/') -expect-> ('/')
     ok 2 checkbase: ('/a/') -expect-> ('/a')
     ok 3 checkbase: ('/a/b/') -expect-> ('/a/b')
+
+**shorter form**
+
+If input is a row object and there is no expected_output param, then return 
+a string using first row values as input and last value as expected output.
+
+        t.plan(tbl.length)
+        tbl.rows.forEach(function(r){
+            t.equal(bpath.checkbase(r.base),  r.exp, t.desc('checkbase', r))
+        })
 
 
 ## t.hector()

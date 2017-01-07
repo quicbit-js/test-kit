@@ -133,6 +133,19 @@ function sum(a, prop_or_func) {
     }
 }
 
+function tableAssert(t) {
+    return (data, fn) => {
+        let tbl = t.table(data)
+        t.plan(tbl.length)
+        tbl.rows.forEach((r) => {
+            let vals = r._vals
+            let exp = vals.pop()
+            let out = fn.apply(null, vals)
+            t.deepEqual(out, exp, t.desc('', vals, exp))
+        })
+    }
+}
+
 function err(msg) { throw Error(msg) }
 
 function type(v) {
@@ -250,16 +263,15 @@ function testfn(name_or_fn, enrich_fns) {
 //
 // return a simple description of a function test: inputs -> outputs
 testfn.DEFAULT_FUNCTIONS = {
-    desc:  () => desc,
-    table: () => function(data) {
-        return require('test-table').from_data(data)
-    },
-    str:    () => str,
-    lines:  () => text_lines,
-    hector: () => hector,
-    sum:    () => sum,
-    count:  () => count,
-    type:   () => type
+    count:       () => count,
+    desc:        () => desc,
+    hector:      () => hector,
+    lines:       () => text_lines,
+    str:         () => str,
+    sum:         () => sum,
+    table:       () => (data) => { return require('test-table').from_data(data) },
+    tableAssert: (t) => tableAssert(t),
+    type:        () => type
 }
 
 module.exports = testfn

@@ -91,23 +91,18 @@ test('test-defaults: count len = 1', function(t) {
 })
 
 test('test-defaults: count len > 1', function(t) {
-    let tbl = t.table([
+    let tbl = t.tableAssert([
         [ 's',           'v',      'exp' ],
         [ '',            '10',      0  ],
         [ '10',          '10',      1  ],
         [ '101',         '10',      1  ],
         [ '1010',        '10',      2  ],
         [ '0100101001',  '10',      3  ],
-    ])
-
-    t.plan(tbl.length)
-    tbl.rows.forEach((r) => {
-        t.equal(t.count(r.s, r.v), r.exp, t.desc('count str', [r.s, r.v], r.exp))
-    })
+    ], t.count)
 })
 
 test('test-defaults: sum', (t) => {
-    let tbl = t.table([
+    let tbl = t.tableAssert([
         [ 'a',                          'prop',             'exp' ],
         [ [],                            null,                  0  ],
         [ [0,1,2],                       null,                  3  ],
@@ -120,16 +115,20 @@ test('test-defaults: sum', (t) => {
         [ [''],                          (v) => v.length,      0  ],
         [ ['abcd', 'ef', 'ghi'],         (v) => v.length,      9  ],
 
-    ])
+    ], t.sum)
+})
 
-    t.plan(tbl.length)
-    tbl.rows.forEach((r) => {
-        t.equal(t.sum(r.a, r.prop), r.exp, t.desc('sum', r))
-    })
+test('test-tableAssert', (t) => {
+    t.tableAssert([
+        ['a',     'b',      'exp'],
+        [[],      [1],       [1] ],
+        [[1],     [2,3],     [1,2,3]],
+        [[1,2],   [],        [1,2]],
+    ], (a, b) => a.concat(b) )
 })
 
 test('test-defaults: str', (t) => {
-    let tbl = t.table([
+    t.tableAssert([
         [ 'v',              'exp' ],
         [  1,               '1' ],
         [  null,            'null' ],
@@ -137,16 +136,11 @@ test('test-defaults: str', (t) => {
         [  [1,2],           '[1,2]'],
         [  {a:1,b:[null]},  "{'a':1,'b':[null]}" ],
         [  undefined,       'null' ],
-    ])
-
-    t.plan(tbl.length)
-    tbl.rows.forEach((r) => {
-        t.equal(t.str(r.v), r.exp, t.desc('str', [r.v], r.exp))
-    })
+    ], t.str)
 })
 
 test('test-defaults: type', (t) => {
-    let tbl = t.table([
+    let tbl = t.tableAssert([
         [ 'v',              'exp' ],
         [  1,               'number' ],
         [  null,            'null' ],
@@ -154,11 +148,6 @@ test('test-defaults: type', (t) => {
         [  [1,2],           'array'],
         [  {a:1},           'object' ],
         [  () => 1,         'function' ],
-    ])
-
-    t.plan(tbl.length)
-    tbl.rows.forEach((r) => {
-        t.equal(t.type(r.v), r.exp, t.desc('type', [r.v], r.exp))
-    })
+    ], t.type)
 })
 
