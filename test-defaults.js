@@ -124,7 +124,7 @@ test('test-defaults: sum', (t) => {
 
     t.plan(tbl.length)
     tbl.rows.forEach((r) => {
-        t.equal(t.sum(r.a, r.prop), r.exp, t.desc('sum', [r.a, r.prop], r.exp))
+        t.equal(t.sum(r.a, r.prop), r.exp, t.desc('sum', r))
     })
 })
 

@@ -210,6 +210,21 @@ function hector(names) {
     return ret
 }
 
+// return a one-line string describing expected input and output.
+// If inp is a row object and there is no 'out' param, then return the string using first row values as input and
+// last value as expected output.
+function desc(s, inp, out) {
+    if(arguments.length === 2) {
+        inp._vals || err('expected second argument to be a table Row, not ' + type(inp))
+        let vals = inp._vals
+        inp = vals.slice(0,vals.length-1)
+        out = vals[vals.length-1]
+    } else {
+        arguments.length === 3 || err('expected 2 or 3 arguments')
+    }
+    return s + ': ' + parens(inp) + ' -expect-> ' + parens([out])
+}
+
 function testfn(name_or_fn, enrich_fns) {
     let ret
 
@@ -235,9 +250,7 @@ function testfn(name_or_fn, enrich_fns) {
 //
 // return a simple description of a function test: inputs -> outputs
 testfn.DEFAULT_FUNCTIONS = {
-    desc: () => function(s, inp, out) {
-        return s + ': ' + parens(inp) + ' -expect-> ' + parens([out])
-    },
+    desc:  () => desc,
     table: () => function(data) {
         return require('test-table').from_data(data)
     },
