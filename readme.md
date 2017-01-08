@@ -78,25 +78,27 @@ functions to allow full flexibility:
 
 Creates a simple table for data-driven testing:
 
-    var test = require('test-kit)
-    var match = require('my-super-match')
-    
-    test('test super-match', function(t) {
-       var tbl = t.table([
-          [ 'str', 'match', 'expect' ],
-          [ 'foo', /.*o/,   true     ],
-          [ '1234', '34',   true     ],
-          [ 'barry', 'rrr', false    ],
-       ])
-       
-       t.plan(tbl.length)
-       tbl.forEach(function(r) {
-          t.equal(match( r.str, r.match), r.expect)
-       })
+    var test = require('test-kit).tape()
+
+    test('test-defaults: count', function(t) {
+        let tbl = t.table([
+            [ 's',           'v',      'exp' ],
+            [ '',            '10',      0  ],
+            [ '10',          '10',      1  ],
+            [ '101',         '10',      1  ],
+            [ '1010',        '10',      2  ],
+            [ '0100101001',  '10',      3  ],
+        ])
+        t.plan(tbl.length)
+        tbl.forEach(function(r) {
+            t.equal(t.count(r.s, r.v), r.exp)
+        })
     })
 
-Representing data in tabular form improves brevity and helps highlight test variations and 
-can be very effective at showing expected behavior.
+
+This example comes directly from test-defaults.js included with the package.
+Representing data in tabular form can make it easier to create comprehensive 
+coverage and highlight the test variations.
 
 ## t.tableAssert()
 
@@ -105,16 +107,30 @@ are inputs and the last column is expected output (should deep-equal output)
 of a single function test, 
 then you can write the above test even more concisely as:
 
-    var test = require('test-kit)
+    var test = require('test-kit).tape()
     
-    test('test super-match', function(t) {
-       var tbl = t.tableAssert([
-          [ 'str', 'match', 'expect' ],
-          [ 'foo', /.*o/,   true     ],
-          [ '1234', '34',   true     ],
-          [ 'barry', 'rrr', false    ],
-       ], require('my-super-match' )        // the function to assert
+    test('test-defaults: count len > 1', function(t) {
+        let tbl = t.tableAssert([
+            [ 's',           'v',      'exp' ],
+            [ '',            '10',      0  ],
+            [ '10',          '10',      1  ],
+            [ '101',         '10',      1  ],
+            [ '1010',        '10',      2  ],
+            [ '0100101001',  '10',      3  ],
+        ], t.count)
     })
+
+... which is equivalent to defining these tests with descriptive messages:
+
+    test('test-defaults: count', function(t) {
+        t.plan(5)
+        
+        t.equal(t.count('', '10'), 0, t.desc('', ['', '10'], 0))
+        t.equal(t.count('10', '10'), 1, t.desc('', ['10', '10'], 1))
+        t.equal(t.count('101', '10'), 1, t.desc('', ['101', '10'], 1))
+        t.equal(t.count('1010', '10'), 2, t.desc('', ['1010', '10'], 2))
+        t.equal(t.count('0100101001', '10'), 3, t.desc('', ['0100101001', '10'], 3))
+    }
 
 
 ## t.desc()   "describe"
