@@ -41,8 +41,10 @@ available in tape, but we make it available in node-tap as well.
 
 # Functions Included By Default
 
-The functions described below are available in the t callback argument.
-Most of these functions are tiny and can be understood by looking
+For transparency and to help developers understand this simple
+library, test-kit exposes a 
+DEFAULT_FUNCTIONS property, which is an object holding test-kits additional test functions:  
+Most of these extra functions are tiny and can be understood by looking
 at the index.js file:  
 
     testfn.DEFAULT_FUNCTIONS = {
@@ -57,7 +59,7 @@ at the index.js file:
         type:        () => type
     }
     
-... or looking at usage in test-defaults.js.
+... or looking at usage in test/default-function-tests.js.
     
 You can define your own test functions by passing them into tape() or tap():
 
@@ -65,14 +67,18 @@ You can define your own test functions by passing them into tape() or tap():
     
 ... or wrap some other test library:
 
-    var test = require('test-kit)('my_tap', { myfunc: () => ... } )
+    var test = require('test-kit)(require('mytap'), { myfunc: () => ... } )
     
-To pander to the control-freak common to many of us engineers, test-kit also exports default 
-functions to allow full flexibility:
+The 'require()(require())' form of loading test-kit is also useful when you want your dependencies
+to be visible to tools like browserify:
 
-    // roll-your-own kit
-    var tk = require('test-kit')
-    var test = tk('my_tap', Object.assign({}, tk.DEFAULT_FUNCTIONS, my_functions))
+    var test = require('test-kit')(require('tape'))  // traceable dependency
+    var test = require('test-kit')('tape')           // not traceable
+    var test = require('test-kit').tape()            // not traceable
+   
+... a distinction that probably only matters if you need to create stand-alone bundles from your tests
+themselves.
+    
 
 ## t.table()
 
@@ -96,7 +102,7 @@ Creates a simple table for data-driven testing:
     })
 
 
-This example comes directly from test-defaults.js included with the package.
+This example comes directly from default-function-tests.js included with the package.
 Representing data in tabular form can make it easier to create comprehensive 
 coverage and highlight the test variations.
 
@@ -238,7 +244,7 @@ Return the value type using Object.prototype.toString
         return ret.substring(8, ret.length-1)
     }
     
-From test-defaults.js:
+From default-function-tests.js:
 
     v(alue) -> exp(ected output) 
 

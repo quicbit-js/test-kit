@@ -14,7 +14,7 @@
     "tape": "^4.6.2"
   },
   "scripts": {
-    "test": "tap --coverage-report=html test-*.js"
+    "test": "tap --coverage-report=html test/test-*.js"
   },
   "keywords": [
     "test",

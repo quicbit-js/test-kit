@@ -238,7 +238,21 @@ function desc(s, inp, out) {
     return s + ': ' + parens(inp) + ' -expect-> ' + parens([out])
 }
 
-function testfn(name_or_fn, enrich_fns) {
+let DEFAULT_FUNCTIONS = {
+    count:       () => count,
+    desc:        () => desc,
+    hector:      () => hector,
+    lines:       () => text_lines,
+    str:         () => str,
+    sum:         () => sum,
+    table:       () => (data) => { return require('test-table').from_data(data) },
+    tableAssert: (t) => tableAssert(t),
+    type:        () => type
+}
+
+function testfn(name_or_fn, custom_fns, opt) {
+    opt = opt || {custom_only: false}
+    let enrich_fns = Object.assign({},  opt.custom_only ? {} : DEFAULT_FUNCTIONS, custom_fns )
     let ret
 
     let test_orig = name_or_fn
@@ -254,6 +268,18 @@ function testfn(name_or_fn, enrich_fns) {
         ret.only = function() { runner.addTest(arguments, true) }
         runner.run()
     }
+    ret.engineType = test_orig.only && test_orig.onFinish ? 'tape' : 'tap'  // just a guess by what is likely
+    Object.keys(test_orig).forEach((k) => {
+        if(!ret[k]) {
+            let orig = test_orig[k]
+            if(typeof orig === 'function') {
+                ret[k] = function() {return orig.apply(test_orig, arguments)}  // call function with original context
+            } else {
+                ret[k] = orig
+            }
+        }
+    })
+    // ret.onFinish = test_orig.onFinish // only available in tape
     return ret
 }
 
@@ -262,19 +288,12 @@ function testfn(name_or_fn, enrich_fns) {
 //      test( 'my test', function(t) {...} )   // applied to the 't' object
 //
 // return a simple description of a function test: inputs -> outputs
-testfn.DEFAULT_FUNCTIONS = {
-    count:       () => count,
-    desc:        () => desc,
-    hector:      () => hector,
-    lines:       () => text_lines,
-    str:         () => str,
-    sum:         () => sum,
-    table:       () => (data) => { return require('test-table').from_data(data) },
-    tableAssert: (t) => tableAssert(t),
-    type:        () => type
-}
+testfn.DEFAULT_FUNCTIONS = DEFAULT_FUNCTIONS
 
 module.exports = testfn
-module.exports.tap =  function(test_fns) { return testfn('tap',  Object.assign({}, testfn.DEFAULT_FUNCTIONS, test_fns)) }
-module.exports.tape = function(test_fns) { return testfn('tape', Object.assign({}, testfn.DEFAULT_FUNCTIONS, test_fns)) }
+
+// these convenience functions use dynamic 'require()' that allows test-kit to NOT depend on both tap and tape -
+// so required dependencies are kept light.
+module.exports.tap =  function(custom_fns, opt) { return testfn('tap',  custom_fns, opt) }
+module.exports.tape = function(custom_fns, opt) { return testfn('tape', custom_fns, opt) }
 

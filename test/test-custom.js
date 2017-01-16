@@ -1,15 +1,17 @@
 'use strict'
 
-let test = require('.')('tape', {
-    // override count
-    count: () => (a,v) => {
-        for(var i=0,c=0; i<a.length; i++) { if(a[i] === v) c++ }
-        return -c   // reversed
+let test = require('..')('tape', {
+        // override count
+        count: () => (a,v) => {
+            for(var i=0,c=0; i<a.length; i++) { if(a[i] === v) c++ }
+            return -c   // reversed
+        },
+        fooequal: (t) => (a,b)=> {
+            return a + 'foo' === b
+        },
     },
-    fooequal: (t) => (a,b)=> {
-        return a + 'foo' === b
-    }
-})
+    { custom_only: true }   // include only custom functions, no default functions
+)
 
 test('test-custom: functions defined', (t) => {
     t.plan(5)

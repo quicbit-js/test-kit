@@ -1,6 +1,6 @@
 'use strict'
 
-let test = require('.').tape()
+let test = require('..').tap()
 
 test('test-only: this function should not run', (t) => {
     t.plan(1)
