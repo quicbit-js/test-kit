@@ -141,6 +141,9 @@ function test_defaults(test) {
     })
 
     test(test.engineType + ': type', (t) => {
+        class A {
+            constructor() {this.x = 3}
+        }
         let tbl = t.tableAssert([
             ['v', 'exp'],
             [1, 'number'],
@@ -148,6 +151,7 @@ function test_defaults(test) {
             [undefined, 'undefined'],
             [[1, 2], 'array'],
             [{a: 1}, 'object'],
+            [new A(), 'object'],
             [() => 1, 'function'],
         ], t.type)
     })
