@@ -7,7 +7,7 @@
   "email": "support@quicbit.com",
   "repository": "quicbit-js/test-kit",
   "dependencies": {
-    "test-table": "^1.0.0"
+    "test-table": "^1.0.1"
   },
   "devDependencies": {
     "tap": "^5.7.0",

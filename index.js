@@ -133,9 +133,13 @@ function sum(a, prop_or_func) {
     }
 }
 
+// input can be a 2D array or a Table object - for every row, assert that
+//
+//    fn(first-n-columns) == last-column
+//
 function tableAssert(t) {
-    return (data, fn) => {
-        let tbl = t.table(data)
+    return (dataOrTable, fn) => {
+        let tbl = t.table(dataOrTable)
         t.plan(tbl.length)
         tbl.rows.forEach((r) => {
             let vals = r._vals
@@ -245,7 +249,7 @@ let DEFAULT_FUNCTIONS = {
     lines:       () => text_lines,
     str:         () => str,
     sum:         () => sum,
-    table:       () => (data) => { return require('test-table').from_data(data) },
+    table:       () => (data) => { return require('test-table').create(data) },
     tableAssert: (t) => tableAssert(t),
     type:        () => type
 }

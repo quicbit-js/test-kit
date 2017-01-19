@@ -119,13 +119,22 @@ function test_defaults(test) {
         ], t.sum)
     })
 
-    test(test.engineType + ': tableAssert', (t) => {
+    test(test.engineType + ': tableAssert matrix', (t) => {
         t.tableAssert([
             ['a', 'b', 'exp'],
             [[], [1], [1]],
             [[1], [2, 3], [1, 2, 3]],
             [[1, 2], [], [1, 2]],
         ], (a, b) => a.concat(b))
+    })
+
+    test(test.engineType + ': tableAssert table', (t) => {
+        t.tableAssert(t.table([
+            ['a', 'b', 'exp'],
+            [[], [1], [1]],
+            [[1], [2, 3], [1, 2, 3]],
+            [[1, 2], [], [1, 2]],
+        ]), (a, b) => a.concat(b))
     })
 
     test(test.engineType + ': str', (t) => {
