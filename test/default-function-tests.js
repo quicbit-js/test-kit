@@ -119,22 +119,38 @@ function test_defaults(test) {
         ], t.sum)
     })
 
-    test(test.engineType + ': tableAssert matrix', (t) => {
-        t.tableAssert([
+    test(test.engineType + ': tableAssert - auto-plan', (t) => {
+        let tbl = t.table([
             ['a', 'b', 'exp'],
             [[], [1], [1]],
             [[1], [2, 3], [1, 2, 3]],
             [[1, 2], [], [1, 2]],
-        ], (a, b) => a.concat(b))
+        ])
+        t.tableAssert(tbl, (a, b) => a.concat(b))
     })
 
-    test(test.engineType + ': tableAssert table', (t) => {
-        t.tableAssert(t.table([
+    test(test.engineType + ': tableAssert - pre-plan', (t) => {
+        let tbl = t.table([
             ['a', 'b', 'exp'],
             [[], [1], [1]],
             [[1], [2, 3], [1, 2, 3]],
             [[1, 2], [], [1, 2]],
-        ]), (a, b) => a.concat(b))
+        ])
+        t.plan(tbl.length * 2)
+        t.tableAssert(tbl, (a, b) => a.concat(b), {plan:false})
+        t.tableAssert(tbl, (a, b) => a.concat(b), {plan:false})
+    })
+
+    test(test.engineType + ': tableAssert - end', (t) => {
+        let tbl = t.table([
+            ['a', 'b', 'exp'],
+            [[], [1], [1]],
+            [[1], [2, 3], [1, 2, 3]],
+            [[1, 2], [], [1, 2]],
+        ])
+        t.tableAssert(tbl, (a, b) => a.concat(b), {plan:false})
+        t.tableAssert(tbl, (a, b) => a.concat(b), {plan:false})
+        t.end()
     })
 
     test(test.engineType + ': str', (t) => {

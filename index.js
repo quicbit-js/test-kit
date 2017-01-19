@@ -49,11 +49,13 @@ function enrich_test_arguments(args, enrich_fns) {
 
 
 // enrich the test or 't' object by applying transforms in enrich_fns
+// 'fn' is the user function that we will call with the new enriched 't':  fn(t)
 function enrich_t(fn, enrich_fns) {
-    return function(t) {
+    return function(torig) {
+        let tnew = Object.create(torig)
         let funcnames = Object.keys(enrich_fns)
-        funcnames.forEach(n => { t[n] = enrich_fns[n](t) })
-        fn(t)
+        funcnames.forEach(n => { tnew[n] = enrich_fns[n](torig, tnew) })
+        fn(tnew)
     }
 }
 
@@ -133,19 +135,30 @@ function sum(a, prop_or_func) {
     }
 }
 
+function table(data) {
+    return require('test-table').create(data)
+}
+
 // input can be a 2D array or a Table object - for every row, assert that
 //
 //    fn(first-n-columns) == last-column
 //
-function tableAssert(t) {
-    return (dataOrTable, fn) => {
-        let tbl = t.table(dataOrTable)
-        t.plan(tbl.length)
+// If opt.plan === true will plan the tests to the table length: t.plan(table.length).  opt.plan
+// will also default to true if t.plan() has not yet been called.  That is, tableAssert sets the plan unless
+// you pass {plan: false}, or call t.plan(n) prior to t.tableAssert().
+function tableAssert(torig, tnew) {
+    return (dataOrTable, fn, opt) => {
+        let tbl = tnew.table(dataOrTable)
+        opt = opt || {}
+        opt.plan = opt.plan == null ? !tnew.planned_tests : opt.plan
+        if(opt.plan) {
+            torig.plan(tbl.length)
+        }
         tbl.rows.forEach((r) => {
             let vals = r._vals
             let exp = vals.pop()
             let out = fn.apply(null, vals)
-            t.deepEqual(out, exp, t.desc('', vals, exp))
+            tnew.deepEqual(out, exp, tnew.desc('', vals, exp))
         })
     }
 }
@@ -155,6 +168,13 @@ function err(msg) { throw Error(msg) }
 function type(v) {
     let ret = Object.prototype.toString.call(v)
     return ret.substring(8, ret.length-1).toLowerCase()
+}
+
+function plan(torig, tnew) {
+    return function(n) {
+        tnew.planned_tests = n       // mark tests as planned (see tableAssert)
+        return torig.plan(n)
+    }
 }
 
 function countstr(s, v) {
@@ -232,8 +252,7 @@ function hector(names) {
 // last value as expected output.
 function desc(s, inp, out) {
     if(arguments.length === 2) {
-        inp._vals || err('expected second argument to be a table Row, not ' + type(inp))
-        let vals = inp._vals
+        let vals = inp._vals || err('expected second argument to be a table Row, not ' + type(inp))
         inp = vals.slice(0,vals.length-1)
         out = vals[vals.length-1]
     } else {
@@ -242,6 +261,8 @@ function desc(s, inp, out) {
     return s + ': ' + parens(inp) + ' -expect-> ' + parens([out])
 }
 
+// created functions may be given the original test object and the new test object to invoke new or prior-defined
+// functions (delegate).
 let DEFAULT_FUNCTIONS = {
     count:       () => count,
     desc:        () => desc,
@@ -249,9 +270,10 @@ let DEFAULT_FUNCTIONS = {
     lines:       () => text_lines,
     str:         () => str,
     sum:         () => sum,
-    table:       () => (data) => { return require('test-table').create(data) },
-    tableAssert: (t) => tableAssert(t),
-    type:        () => type
+    table:       () => table,
+    tableAssert: (torig, tnew) => tableAssert(torig, tnew),
+    type:        () => type,
+    plan:        (torig, tnew) => plan(torig, tnew)
 }
 
 function testfn(name_or_fn, custom_fns, opt) {

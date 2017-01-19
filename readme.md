@@ -47,19 +47,24 @@ DEFAULT_FUNCTIONS property, which is an object holding test-kits additional test
 Most of these extra functions are tiny and can be understood by looking
 at the index.js file:  
 
-    testfn.DEFAULT_FUNCTIONS = {
+    let DEFAULT_FUNCTIONS = {
         count:       () => count,
         desc:        () => desc,
         hector:      () => hector,
         lines:       () => text_lines,
         str:         () => str,
         sum:         () => sum,
-        table:       () => (data) => { return require('test-table').from_data(data) },
-        tableAssert: () => tableAssert,
-        type:        () => type
+        table:       () => table,
+        tableAssert: (torig, tnew) => tableAssert(torig, tnew),
+        type:        () => type,
+        plan:        (torig, tnew) => plan(torig, tnew)
     }
-    
-... or looking at usage in test/default-function-tests.js.
+
+Each entry in the map returns a test function.  Returned functions may use the original and/or new test
+objects (torig, tnew) as part of their implementation.
+
+Reading the tests for these functions themselves in [test/default-function-tests.js](https://github.com/quicbit-js/test-kit/blob/master/test/default-function-tests.js) 
+also helps explain how these functions work. 
     
 You can define your own test functions by passing them into tape() or tap():
 
