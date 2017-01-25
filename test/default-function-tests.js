@@ -3,7 +3,7 @@
 // these tests are run both with tape and tap
 
 function test_defaults(test) {
-    test(test.engineType + ': lines', (t) => {
+    test(test.engine + ': lines', (t) => {
         t.plan(6)
         let lines = `
         
@@ -22,7 +22,7 @@ function test_defaults(test) {
         
     `
 
-        t.deepEqual(t.lines(lines), [
+        t.same(t.lines(lines), [
             'input',
             '',
             '    with indentation',
@@ -37,14 +37,14 @@ function test_defaults(test) {
             'removed.'
         ])
 
-        t.deepEqual(t.lines(''), [])
-        t.deepEqual(t.lines('hi') ['hi'])
-        t.deepEqual(t.lines('\nhi') ['hi'])
-        t.deepEqual(t.lines('hi\n') ['hi'])
-        t.deepEqual(t.lines('\n\n'), [])
+        t.same(t.lines(''), [])
+        t.same(t.lines('hi') ['hi'])
+        t.same(t.lines('\nhi') ['hi'])
+        t.same(t.lines('hi\n') ['hi'])
+        t.same(t.lines('\n\n'), [])
     })
 
-    test(test.engineType + ': hector', (t) => {
+    test(test.engine + ': hector', (t) => {
         let args = [
             [null, 5, 'a'],
             [undefined, 7, 'b'],
@@ -66,12 +66,12 @@ function test_defaults(test) {
         tbl.rows.forEach(r => {
             let hec = t.hector(names)
             args.forEach(a => hec.apply(hec, a))
-            t.deepEquals(hec.arg(r.i), r.exp, t.desc('hector', [r.names, r.i], r.exp))
-            t.deepEquals(hec.arg(r.name), r.exp, t.desc('hector', [r.names, r.name], r.exp))
+            t.sames(hec.arg(r.i), r.exp, t.desc('hector', [r.names, r.i], r.exp))
+            t.sames(hec.arg(r.name), r.exp, t.desc('hector', [r.names, r.name], r.exp))
         })
     })
 
-    test(test.engineType + ': count len = 1', function (t) {
+    test(test.engine + ': count len = 1', function (t) {
         let tbl = t.table([
             ['s', 'v', 'exp'],
             ['', 'x', 0],
@@ -91,7 +91,7 @@ function test_defaults(test) {
         })
     })
 
-    test(test.engineType + ': count len > 1', function (t) {
+    test(test.engine + ': count len > 1', function (t) {
         let tbl = t.tableAssert([
             ['s', 'v', 'exp'],
             ['', '10', 0],
@@ -102,7 +102,7 @@ function test_defaults(test) {
         ], t.count)
     })
 
-    test(test.engineType + ': sum', (t) => {
+    test(test.engine + ': sum', (t) => {
         let tbl = t.tableAssert([
             ['a', 'prop', 'exp'],
             [[], null, 0],
@@ -119,7 +119,7 @@ function test_defaults(test) {
         ], t.sum)
     })
 
-    test(test.engineType + ': tableAssert - auto-plan', (t) => {
+    test(test.engine + ': tableAssert - auto-plan', (t) => {
         let tbl = t.table([
             ['a', 'b', 'exp'],
             [[], [1], [1]],
@@ -129,7 +129,7 @@ function test_defaults(test) {
         t.tableAssert(tbl, (a, b) => a.concat(b))
     })
 
-    test(test.engineType + ': tableAssert - pre-plan', (t) => {
+    test(test.engine + ': tableAssert - pre-plan', (t) => {
         let tbl = t.table([
             ['a', 'b', 'exp'],
             [[], [1], [1]],
@@ -141,7 +141,7 @@ function test_defaults(test) {
         t.tableAssert(tbl, (a, b) => a.concat(b), {plan:false})
     })
 
-    test(test.engineType + ': tableAssert - end', (t) => {
+    test(test.engine + ': tableAssert - end', (t) => {
         let tbl = t.table([
             ['a', 'b', 'exp'],
             [[], [1], [1]],
@@ -153,7 +153,7 @@ function test_defaults(test) {
         t.end()
     })
 
-    test(test.engineType + ': str', (t) => {
+    test(test.engine + ': str', (t) => {
         t.tableAssert([
             ['v', 'exp'],
             [1, '1'],
@@ -165,7 +165,7 @@ function test_defaults(test) {
         ], t.str)
     })
 
-    test(test.engineType + ': type', (t) => {
+    test(test.engine + ': type', (t) => {
         class A {
             constructor() {this.x = 3}
         }
@@ -185,7 +185,7 @@ function test_defaults(test) {
         test.onFinish(() => {
             // there is no way to assert this using the test harness itself (test is finished)
             // so print to indicate done.
-            console.log('# ' + test.engineType + ' finished defaults')
+            console.log('# ' + test.engine + ' finished defaults')
         })
     }
 }

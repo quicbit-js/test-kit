@@ -158,7 +158,7 @@ function tableAssert(torig, tnew) {
             let vals = r._vals
             let exp = vals.pop()
             let out = fn.apply(null, vals)
-            tnew.deepEqual(out, exp, tnew.desc('', vals, exp))
+            tnew.same(out, exp, tnew.desc('', vals, exp))
         })
     }
 }
@@ -294,7 +294,7 @@ function testfn(name_or_fn, custom_fns, opt) {
         ret.only = function() { runner.addTest(arguments, true) }
         runner.run()
     }
-    ret.engineType = test_orig.only && test_orig.onFinish ? 'tape' : 'tap'  // just a guess by what is likely
+    ret.engine = test_orig.only && test_orig.onFinish ? 'tape' : 'tap'  // just a guess by what is likely
     Object.keys(test_orig).forEach((k) => {
         if(!ret[k]) {
             let orig = test_orig[k]
