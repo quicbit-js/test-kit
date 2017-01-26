@@ -254,9 +254,9 @@ in tape
 ... will only run the one test, regardless of how many others are in the file.
 
 
-# Custom Functions and How It Works
+# Understanding and Extending test-kit
 
-For transparency and to help developers understand how it works,
+For transparency and to help developers understand how the package works,
 test-kit exposes a 
 DEFAULT_FUNCTIONS object, which holds all of test-kits test functions: 
  
