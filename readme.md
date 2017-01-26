@@ -296,14 +296,16 @@ You can define your own test functions by passing them into tape() or tap():
 
 # Packaging Tests with Browserify and Other Tools
 
-While <code>require('test-kit').tape()</code> is convenient, if you use packaging tools that need to navigate
-test dependencies such as browserify, it is best to use <code>require(...)(require(...))</code>:
+Calling <code>require('test-kit').tape()</code> is convenient, but if you are packaging your tests
+with browserify or similar tools, use the <code>require(...)(require(...))</code> form instead:
 
-    require('test-kit')(require('tape'))
+    var test = require('test-kit')(require('tap'))               // OK
+    var test = require('test-kit')(require('tape'))              // OK
+    var test = require('test-kit')(require('tape'), custom_fns)  // OK
     
-Using this form makes tape visible for linking and packaging.
 
-    var test = require('test-kit')(require('tape'))  // traceable dependency
-    var test = require('test-kit')('tape')           // not traceable
+    var test = require('test-kit').tap()             // not traceable
     var test = require('test-kit').tape()            // not traceable
+    var test = require('test-kit')('tap')            // not traceable
+    var test = require('test-kit')('tape')           // not traceable
    
