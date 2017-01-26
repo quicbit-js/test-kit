@@ -289,16 +289,21 @@ You can define your own test functions by passing them into tape() or tap():
 
     var test = require('test-kit').tap({ myfunc: () => ... } )
     
-... or wrap some other test library:
+... or enrich a different test library (e.g. your own 'mytap').
 
     var test = require('test-kit)(require('mytap'), { myfunc: () => ... } )
     
-The 'require()(require())' form of loading test-kit is also useful when you want your dependencies
-to be visible to tools like browserify:
+
+# Packaging Tests with Browserify and Other Tools
+
+While <code>require('test-kit').tape()</code> is convenient, if you use packaging tools that need to navigate
+test dependencies such as browserify, it is best to use <code>require(...)(require(...))</code>:
+
+    require('test-kit')(require('tape'))
+    
+Using this form makes tape visible for linking and packaging.
 
     var test = require('test-kit')(require('tape'))  // traceable dependency
     var test = require('test-kit')('tape')           // not traceable
     var test = require('test-kit').tape()            // not traceable
    
-... a distinction that probably only matters if you need to create stand-alone bundles from your tests
-themselves.
