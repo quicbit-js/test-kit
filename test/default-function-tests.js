@@ -66,8 +66,8 @@ function test_defaults(test) {
         tbl.rows.forEach(r => {
             let hec = t.hector(names)
             args.forEach(a => hec.apply(hec, a))
-            t.sames(hec.arg(r.i), r.exp, t.desc('hector', [r.names, r.i], r.exp))
-            t.sames(hec.arg(r.name), r.exp, t.desc('hector', [r.names, r.name], r.exp))
+            t.same(hec.arg(r.i), r.exp, t.desc('hector', [r.names, r.i], r.exp))
+            t.same(hec.arg(r.name), r.exp, t.desc('hector', [r.names, r.name], r.exp))
         })
     })
 
@@ -137,8 +137,8 @@ function test_defaults(test) {
             [[1, 2], [], [1, 2]],
         ])
         t.plan(tbl.length * 2)
-        t.tableAssert(tbl, (a, b) => a.concat(b), {plan:false})
-        t.tableAssert(tbl, (a, b) => a.concat(b), {plan:false})
+        t.tableAssert(tbl, (a, b) => a.concat(b))
+        t.tableAssert(tbl, (a, b) => a.concat(b))
     })
 
     test(test.engine + ': tableAssert - end', (t) => {
@@ -148,8 +148,8 @@ function test_defaults(test) {
             [[1], [2, 3], [1, 2, 3]],
             [[1, 2], [], [1, 2]],
         ])
-        t.tableAssert(tbl, (a, b) => a.concat(b), {plan:false})
-        t.tableAssert(tbl, (a, b) => a.concat(b), {plan:false})
+        t.tableAssert(tbl, (a, b) => a.concat(b), {plan:0})
+        t.tableAssert(tbl, (a, b) => a.concat(b), {plan:0})
         t.end()
     })
 

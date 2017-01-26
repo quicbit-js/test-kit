@@ -126,7 +126,7 @@ function countws(s) {
 }
 
 function sum(a, prop_or_func) {
-    if(prop_or_func === null || prop_or_func === undefined) {
+    if(prop_or_func == null) {
         return a.reduce((s,v) => s + (v || 0), 0)
     } else if(typeof prop_or_func === 'function') {
         return a.reduce((s,v) => s + prop_or_func(v), 0)
@@ -139,31 +139,64 @@ function table(data) {
     return require('test-table').create(data)
 }
 
-// input can be a 2D array or a Table object - for every row, assert that
+// 'dataOrTable' can be a 2D array with a header row or a Table object
 //
-//    fn(first-n-columns) == last-column
 //
-// If opt.plan === true will plan the tests to the table length: t.plan(table.length).  opt.plan
-// will also default to true if t.plan() has not yet been called.  That is, tableAssert sets the plan unless
-// you pass {plan: false}, or call t.plan(n) prior to t.tableAssert().
+// fn is the assertion function applied to each row
+//
+// opt settings control how the assertion function is applied and how tests are planned
+//    {
+//        io:   'last-out',  // (default) all columns but the last are inputs to fn, and the last column is the
+//                           // expected fn output.  IOW, for each row, assert.same(fn(first-n-values), last-value)
+//              'no-out',    // Execute fn(all-column-values), without asserting fn output (fn should do asserts itself)
+//
+//        plan: n-or-string  // Set t.plan() prior to running table tests, iff plan() was not
+//                           // already called.  That is, t.plan(3) prior to tableAssert(tbl, fn) will simply plan(3), but
+//                           // tableAssert(tbl, fn) will do plan(tbl.length), the default setting.
+//                           //
+//                           // (integer) (default is 1) plan this number of tests per row.  IOW, plan(tbl.length * n)
+//                           // (string) if set to a column name, use that column as the expected plan count for each row (variable asserts)
+//                           // If set to zero, then don't call plan during tableAssert().
+//    }
 function tableAssert(torig, tnew) {
     return (dataOrTable, fn, opt) => {
         let tbl = tnew.table(dataOrTable)
-        opt = opt || {}
-        opt.plan = opt.plan == null ? !tnew.planned_tests : opt.plan
-        if(opt.plan) {
-            torig.plan(tbl.length)
+        opt = Object.assign({}, opt)
+        if(opt.plan == null) {
+            opt.plan = tnew.planned_tests ? 0 : 1
+        } else {
+            opt.plan === 0 || !tnew.planned_tests || err('plan has already been set: ' + tnew.planned_tests)
         }
+
+        if(opt.plan) {      // non-zero
+            var plan_total
+            if(typeof opt.plan === 'string') {
+                plan_total = tnew.sum(tbl.vals(opt.plan))
+            } else {
+                plan_total = tbl.length * opt.plan
+            }
+            torig.plan(plan_total)
+        }
+
+        var exp_col = opt.io || 'last-out'
+        ~['last-out', 'no-out'].indexOf(exp_col) || err('unexpected value for opt.io')
         tbl.rows.forEach((r) => {
-            let vals = r._vals
-            let exp = vals.pop()
-            let out = fn.apply(null, vals)
-            tnew.same(out, exp, tnew.desc('', vals, exp))
+            var vals = r._vals
+            var exp_val
+            if(exp_col === 'last-out') {
+                vals = vals.slice()
+                exp_val = vals.pop()
+                tnew.same(fn.apply(null, vals), exp_val, tnew.desc('', vals, vals[exp_col]))
+            } else {
+                fn.apply(null, vals)
+            }
         })
     }
 }
 
-function err(msg) { throw Error(msg) }
+function err(msg) {
+    throw Error(msg)
+}
 
 function type(v) {
     let ret = Object.prototype.toString.call(v)
