@@ -283,7 +283,7 @@ We liked it in [tape](https://github.com/substack/tape), so now it is available 
 to implement, but so darn handy, we just didn't want to give it up after getting hooked on it
 in tape
 
-    var test = require('test-kit)
+    var test = require('test-kit').tape()
 
     test.only('test assertions', function(t) {
        ...
