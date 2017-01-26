@@ -201,13 +201,25 @@ The returned function has two properties:
     f.args                  the array/stack of arguments collected
     f.arg(name_or_number)   function returning array of arguments of the given 
                                 name (if names was used, above), or number/index.
+
+## t.count()
+
+    t.count(buf, value)
+    
+Return the number of occurrences of value in a Uint8Array (or string or array).  Counting
+substrings in a string can handle different length substring values and employs a incrementing
+indexOf check for the count.  However, 
+uint8arrays currently only count single byte or single string (character code) occurences 
+and arrays only count values using '==='.
     
 ## t.sum()
 
-    t.sum(a, v)
+    t.sum(array, property_or_function)
 
-Return the sum of values in an array, buffer, or string.  Handles substrings.
-If prop is given, return the sum of values of the given property.
+Return the sum of values in an array, buffer, or string.  If second argument is a function,
+return the sum of the results of the function applied to each array value.  If second
+argument is a string or number, return the sum of that property of all items in the 
+array.
 
 ## t.str()
 
