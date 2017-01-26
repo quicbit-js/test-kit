@@ -215,26 +215,27 @@ interim blank lines and relative space-indentation.  (using first space-indented
 
 ## t.type()
 
-Return the value type using Object.prototype.toString
+Return the value type using Object.prototype.toString.  The implementation from index.js:
     
     function type(v) {
-        Object.prototype.toString.call(v)
-        return ret.substring(8, ret.length-1)
+        let ret = Object.prototype.toString.call(v)
+        return ret.substring(8, ret.length-1).toLowerCase()
     }
     
-From default-function-tests.js:
+For the cases below, type(v) yields the exp(ected) outputs 
 
-    v(alue) -> exp(ected output) 
+        t.tableAssert([
+            [ 'v',       'exp'       ],
+            [ 1,         'number'    ],
+            [ null,      'null'      ],
+            [ undefined, 'undefined' ],
+            [ [1, 2],    'array'     ],
+            [ {a: 1},    'object'    ],
+            [ new A(),   'object'    ],
+            [ () => 1,  'function'   ],
+        ], t.type)
 
-    let tbl = t.table([
-        [ 'v',              'exp' ],
-        [  1,               'number' ],
-        [  null,            'null' ],
-        [  undefined,       'undefined'],
-        [  [1,2],           'array'],
-        [  {a:1},           'object' ],
-        [  () => 1,         'function' ],
-    ])
+(the table was copied from [test/default-function-tests.js](https://github.com/quicbit-js/test-kit/blob/master/test/default-function-tests.js))
     
 
 ## test.only()
