@@ -41,49 +41,10 @@ available in tape, but we make it available in node-tap as well.
 
 # Functions Included By Default
 
-For transparency and to help developers understand this simple
-library, test-kit exposes a 
-DEFAULT_FUNCTIONS property, which is an object holding test-kits additional test functions:  
-Most of these extra functions are tiny and can be understood by looking
-at the index.js file:  
-
-    let DEFAULT_FUNCTIONS = {
-        count:       () => count,
-        desc:        () => desc,
-        hector:      () => hector,
-        lines:       () => text_lines,
-        str:         () => str,
-        sum:         () => sum,
-        table:       () => table,
-        tableAssert: (torig, tnew) => tableAssert(torig, tnew),
-        type:        () => type,
-        plan:        (torig, tnew) => plan(torig, tnew)
-    }
-
-Each entry in the map returns a test function.  Returned functions may use the original and/or new test
-objects (torig, tnew) as part of their implementation.
-
-Reading the tests for these functions themselves in [test/default-function-tests.js](https://github.com/quicbit-js/test-kit/blob/master/test/default-function-tests.js) 
-also helps explain how these functions work. 
-    
-You can define your own test functions by passing them into tape() or tap():
-
-    var test = require('test-kit').tap({ myfunc: () => ... } )
-    
-... or wrap some other test library:
-
-    var test = require('test-kit)(require('mytap'), { myfunc: () => ... } )
-    
-The 'require()(require())' form of loading test-kit is also useful when you want your dependencies
-to be visible to tools like browserify:
-
-    var test = require('test-kit')(require('tape'))  // traceable dependency
-    var test = require('test-kit')('tape')           // not traceable
-    var test = require('test-kit').tape()            // not traceable
-   
-... a distinction that probably only matters if you need to create stand-alone bundles from your tests
-themselves.
-    
+Quicbit Inc's philosphy is to create simple and open software.  
+These functions are very simple and open.  We recommend looking at
+DEFAULT_FUNCTIONS in index.js 
+to understand them and to become comfortable with defining your own.    
 
 ## t.table()
 
@@ -292,4 +253,51 @@ in tape
 ... will only run the one test, regardless of how many others are in the file.
 
 
+# Custom Functions and How It Works
 
+For transparency and to help developers understand how it works,
+test-kit exposes a 
+DEFAULT_FUNCTIONS object, which holds all of test-kits test functions: 
+ 
+Most of these extra functions are tiny and can be understood by looking
+at the index.js file:  
+
+    // Creation functions are passed the original test object and the new test
+    // object so they may invoke new or prior-defined functions (delegate).
+    
+    let DEFAULT_FUNCTIONS = {
+        count:       () => count,
+        desc:        () => desc,
+        hector:      () => hector,
+        lines:       () => text_lines,
+        str:         () => str,
+        sum:         () => sum,
+        table:       () => table,
+        tableAssert: (torig, tnew) => tableAssert(torig, tnew),
+        type:        () => type,
+        plan:        (torig, tnew) => plan(torig, tnew)
+    }
+
+Each entry in the map returns a test function.  Returned functions may use the original and/or new test
+objects (torig, tnew) as part of their implementation.
+
+Reading the tests for these functions themselves in [test/default-function-tests.js](https://github.com/quicbit-js/test-kit/blob/master/test/default-function-tests.js) 
+also helps explain how these functions work. 
+    
+You can define your own test functions by passing them into tape() or tap():
+
+    var test = require('test-kit').tap({ myfunc: () => ... } )
+    
+... or wrap some other test library:
+
+    var test = require('test-kit)(require('mytap'), { myfunc: () => ... } )
+    
+The 'require()(require())' form of loading test-kit is also useful when you want your dependencies
+to be visible to tools like browserify:
+
+    var test = require('test-kit')(require('tape'))  // traceable dependency
+    var test = require('test-kit')('tape')           // not traceable
+    var test = require('test-kit').tape()            // not traceable
+   
+... a distinction that probably only matters if you need to create stand-alone bundles from your tests
+themselves.

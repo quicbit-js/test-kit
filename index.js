@@ -294,8 +294,9 @@ function desc(s, inp, out) {
     return s + ': ' + parens(inp) + ' -expect-> ' + parens([out])
 }
 
-// created functions may be given the original test object and the new test object to invoke new or prior-defined
-// functions (delegate).
+// Creation functions are passed the original test object and the new test
+// object so they may invoke new or prior-defined functions (delegate).
+
 let DEFAULT_FUNCTIONS = {
     count:       () => count,
     desc:        () => desc,
