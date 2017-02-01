@@ -186,7 +186,7 @@ function tableAssert(torig, tnew) {
             if(exp_col === 'last-out') {
                 vals = vals.slice()
                 exp_val = vals.pop()
-                tnew.same(fn.apply(null, vals), exp_val, tnew.desc('', vals, vals[exp_col]))
+                tnew.same(fn.apply(null, vals), exp_val, tnew.desc('', vals, exp_val))
             } else {
                 fn.apply(null, vals)
             }

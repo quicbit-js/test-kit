@@ -39,6 +39,14 @@ function test_defaults(test) {
         ], t.count)
     })
 
+    test(test.engine + ': desc', (t) => {
+        t.tableAssert([
+            [ 'label',        'input',   'output',    'exp'                 ],
+            [ 'msg',          ['a'],     0,           "msg: ('a') -expect-> (0)" ],
+            [ 'msg',          [1,2],     3,           "msg: (1,2) -expect-> (3)" ],
+        ], t.desc)
+    })
+
     test(test.engine + ': sum', (t) => {
         t.tableAssert([
             [ 'array',                'prop_or_function', 'expect'],
