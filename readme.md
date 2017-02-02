@@ -39,6 +39,12 @@ The callback argument 't' will now include enriched features.
 \* the function returned includes the .only() function, which is normally only
 available in tape, but we make it available in node-tap as well.
 
+## Examples
+
+[qb-uint/test](https://github.com/quicbit-js/qb-uint/blob/master/test.js) and 
+[test-kit/test/default-function-tests.js](https://github.com/quicbit-js/test-kit/blob/master/test/default-function-tests.js) 
+have good examples of how to create concise tests with tables.
+
 # Functions Included By Default
 
 Quicbit Inc's philosphy is to create simple and open software.  
