@@ -86,17 +86,63 @@ function test_defaults(test) {
         t.tableAssert(tbl, (a, b) => a.concat(b))
     })
 
-    test(test.engine + ': tableAssert - end', (t) => {
+    test(test.engine + ': tableAssert - plan per row', (t) => {
         let tbl = t.table([
-            ['a', 'b', 'exp'],
-            [[], [1], [1]],
-            [[1], [2, 3], [1, 2, 3]],
-            [[1, 2], [], [1, 2]],
+            ['a',    'b',    'exp'],
+            [[],     [1],    [1]],
+            [[1],    [2, 3], [1, 2, 3]],
+            [[1, 2], [],     [1, 2]],
+        ])
+
+        t.tableAssert(tbl, (a,b,exp) => {
+            t.same(a.concat(b), exp)
+            t.ok(exp)
+        }, {assert: 'none', plan:2})    // 2 asserts per row
+    })
+
+    test(test.engine + ': tableAssert - plan none', (t) => {
+        let tbl = t.table([
+            ['a',    'b',    'exp'],
+            [[],     [1],    [1]],
+            [[1],    [2, 3], [1, 2, 3]],
+            [[1, 2], [],     [1, 2]],
         ])
         t.tableAssert(tbl, (a, b) => a.concat(b), {plan:0})
         t.tableAssert(tbl, (a, b) => a.concat(b), {plan:0})
+        t.same(4, 4)
         t.end()
     })
+
+    test(test.engine + ': tableAssert - plan column', (t) => {
+        let tbl = t.table([
+            ['a',    'b',      'p',       'exp'      ],
+            [[],     [1],       3,       [1]        ],
+            [[1],    [2, 3],    2,       [1, 2, 3]  ],
+            [[1, 2], [],        0,       [1, 2]     ],
+        ])
+        // test that column 'p' designates the plan total
+        t.tableAssert(tbl, (a, b, p) => {for(let i=0; i<p; i++){t.ok(true)}} , {assert:'none', plan:'p'})
+    })
+
+    // Notice how this test can cover many inconvenient corner cases in one table.
+    // I used tap test coverage to find cases and then add one-liners here to cover them.
+    test(test.engine + ': tableAssert - assert throws', (t) => {
+        let tbl = t.table([
+            [ 'fn',           'input',                     'expect' ],
+            [ 'count',        [4,     4],                  /type not handled/  ],
+            [ 'count',        [new Uint8Array(2), false],  /type not handled/  ],
+            [ 'count',        ['abc', 4],                  /should be a string/  ],
+            [ 'count',        ['abc', ''],                 /zero-length string/  ],
+            [ 'count',        [new Uint8Array(2), 'aa'],   /long strings not supported/  ],
+            [ 'tableAssert',  [[['a'],[1]],,{plan:3}],     /plan has already been set/  ],  // tableAssert set default plan (1 per row)
+        ])
+        t.tableAssert(
+            tbl,
+            function(fn, input){ t[fn].apply(null, input) },
+            {assert: 'throws'}
+        )
+    })
+
 
     test(test.engine + ': str', (t) => {
         t.tableAssert([
@@ -182,14 +228,14 @@ function test_defaults(test) {
             ['a0', 0, [null, undefined, {a: [2]}, undefined, {}]],
             ['a1', 1, [5, 7, 9, undefined, 11]],
             ['a2', 2, ['a', 'b', '', undefined, 'end']],
-            ['foo', 3, null],
+            ['foo', 3, [ undefined, undefined, undefined, undefined, undefined ]],
         ])
 
         t.plan(tbl.length * 2)
         tbl.rows.forEach(r => {
             let hec = t.hector(names)
             args.forEach(a => hec.apply(hec, a))
-            t.same(hec.arg(r.i), r.exp, t.desc('hector', [r.names, r.i], r.exp))
+            t.same(hec.arg(r.i),    r.exp, t.desc('hector', [r.names,    r.i], r.exp))
             t.same(hec.arg(r.name), r.exp, t.desc('hector', [r.names, r.name], r.exp))
         })
     })

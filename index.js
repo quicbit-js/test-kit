@@ -146,9 +146,13 @@ function table(data) {
 //
 // opt settings control how the assertion function is applied and how tests are planned
 //    {
-//        io:   'last-out',  // (default) all columns but the last are inputs to fn, and the last column is the
-//                           // expected fn output.  IOW, for each row, assert.same(fn(first-n-values), last-value)
-//              'no-out',    // Execute fn(all-column-values), without asserting fn output (fn should do asserts itself)
+//        assert:  'same',      // (default) all columns but the last are inputs to fn, and the last column
+//                              //    will be asserted using t.same().  IOW, for each row, assert.same(fn(first-n-values), last-value)
+//                 'throws',    // all columns but the last are inputs to fn, and the last column is
+//                              //    a string or regular expression that should match an expected error
+//                              //    using t.throws(() => {fn(first-n-values)}, last-value)
+//                 'none',      // Execute fn(all-column-values), without asserting fn output (fn should do asserts itself)
+//                 anything else.... works like same but using whatever assert function is applied to assert the last column value.
 //
 //        plan: n-or-string  // Set t.plan() prior to running table tests, iff plan() was not
 //                           // already called.  That is, t.plan(3) prior to tableAssert(tbl, fn) will simply plan(3), but
@@ -175,20 +179,23 @@ function tableAssert(torig, tnew) {
             } else {
                 plan_total = tbl.length * opt.plan
             }
-            torig.plan(plan_total)
+            tnew.plan(plan_total)   // sets planned_tests, which cannot be changed
         }
 
-        var exp_col = opt.io || 'last-out'
-        ~['last-out', 'no-out'].indexOf(exp_col) || err('unexpected value for opt.io')
+        var assert = opt.assert || 'same'
         tbl.rows.forEach((r) => {
             var vals = r._vals
             var exp_val
-            if(exp_col === 'last-out') {
+            if(assert === 'none') {
+                fn.apply(null, vals)
+            } else if(assert === 'throws') {
                 vals = vals.slice()
                 exp_val = vals.pop()
-                tnew.same(fn.apply(null, vals), exp_val, tnew.desc('', vals, exp_val))
+                tnew.throws(function(){ fn.apply(null, vals) }, exp_val, tnew.desc('', vals, exp_val.toString()))
             } else {
-                fn.apply(null, vals)
+                vals = vals.slice()
+                exp_val = vals.pop()
+                tnew[assert](fn.apply(null, vals), exp_val, tnew.desc('', vals, exp_val))
             }
         })
     }
@@ -271,27 +278,19 @@ function hector(names) {
     ret.arg = function arg(which) {
         let i = which
         if(typeof i === 'string') {
-            if(!names) return null
-            i = names.indexOf(which)
+            i = names ? names.indexOf(which) : -1
         }
-        if(i < 0 || i >= max_num_args) return null
         return args.map( (list) => list[i] )
     }
     return ret
 }
 
-// return a one-line string describing expected input and output.
-// If inp is a row object and there is no 'out' param, then return the string using first row values as input and
-// last value as expected output.
-function desc(s, inp, out) {
-    if(arguments.length === 2) {
-        let vals = inp._vals || err('expected second argument to be a table Row, not ' + type(inp))
-        inp = vals.slice(0,vals.length-1)
-        out = vals[vals.length-1]
-    } else {
-        arguments.length === 3 || err('expected 2 or 3 arguments')
-    }
-    return s + ': ' + parens(inp) + ' -expect-> ' + parens([out])
+// return a one-line string describing expected input and output of the form:
+//
+//    lbl: [input_a, input_b..] -expect-> output
+//
+function desc(lbl, inp, out) {
+    return lbl + ': ' + parens(inp) + ' -expect-> ' + parens([out])
 }
 
 // Creation functions are passed the original test object and the new test

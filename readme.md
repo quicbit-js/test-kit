@@ -74,14 +74,16 @@ coverage and highlight the test variations.
 
 ## t.tableAssert()
 
-If your test table adheres to the convention where the first columns
+    t.tableAssert(table_or_data, fn, options)
+    
+If your test table adheres to the convention where the first columns of a table
 are inputs and the last column is expected output (should deep-equal output)
 of a single function test, 
 then you can write the above test even more concisely as:
 
     var test = require('test-kit).tape()
     
-    test('test-defaults: count len > 1', function(t) {
+    test('count len > 1', function(t) {
         let tbl = t.tableAssert([
             [ 's',           'v',      'exp' ],
             [ '',            '10',      0  ],
@@ -92,17 +94,93 @@ then you can write the above test even more concisely as:
         ], t.count)
     })
 
-... which is equivalent to defining these tests with descriptive messages:
+Which outputs:
 
-    test('test-defaults: count', function(t) {
-        t.plan(5)
+    # tape: count len > 1
+    ok 1 : ('",'10') -expect-> (0)
+    ok 2 : ('10','10') -expect-> (1)
+    ok 3 : ('101','10') -expect-> (1)
+    ok 4 : ('1010','10') -expect-> (2)
+    ok 5 : ('0100101001','10') -expect-> (3)
+    
+
+This is similar to asserting imperitively:
+
+    test('count len > 1', function(t) {
+        t.plan(5);
         
-        t.equal(t.count('', '10'), 0, t.desc('', ['', '10'], 0))
-        t.equal(t.count('10', '10'), 1, t.desc('', ['10', '10'], 1))
-        t.equal(t.count('101', '10'), 1, t.desc('', ['101', '10'], 1))
-        t.equal(t.count('1010', '10'), 2, t.desc('', ['1010', '10'], 2))
-        t.equal(t.count('0100101001', '10'), 3, t.desc('', ['0100101001', '10'], 3))
+        t.same( t.count( '',           '10'), 0);
+        t.same( t.count( '10',         '10'), 1);
+        t.same( t.count( '101',        '10'), 1);
+        t.same( t.count( '1010',       '10'), 2);
+        t.same( t.count( '0100101001', '10'), 3);
     }
+    
+But the output for using this traditional approach doesn't reveal detail:
+
+    # tape: count len > 1
+    ok 1 should be equivalent
+    ok 2 should be equivalent
+    ok 3 should be equivalent
+    ok 4 should be equivalent
+    ok 5 should be equivalent
+    
+The detailed input and expected output that tableAssert gives speeds up trouble-shooting.
+    
+### Table assert options - more control
+
+A major benefit of t.tableAssert is the common need for its default behavior.  Many tests can
+be written using first several columns for input and last column to assert output - tableAssert()
+will plan one assert per row, print full descriptions, and assert 'same' on each function
+result.  But what if we want another type of assert?  You can use the options parameter
+to use tables with different assert requirements:
+
+    t.tableAssert( table_or_data, fn, options )
+    
+    options is an object with properties:
+        plan:  (number) number of tests to plan() per row.  defaults to 1.  Set to zero to
+                not do any plans and use t.end() instead.
+               (string) a string plan will use the given column name and total up values in
+               a given column to plan the test.
+        assert: (string) - gives the test assert method to apply for every row.  'same' is the
+                          default.  Works for any assert that operates on two inputs.
+                'throws' - will assert that the fn applied to the first columns will
+                          throw an error that matches the expression in the last table column.
+                'none'   - will do no assertions and leave that up you (your function).
+                           The function will use all columns as input.
+               
+**{assert: 'throws'}** is a great way to cover edge cases in your tests.  For example, sI used
+this little table to cover some edge cases in test-table to quickly sweep out those corner cases
+and get 98% coverage:
+
+    test(test.engine + ': tableAssert - assert throws', (t) => {
+        let tbl = t.table([
+            [ 'fn',           'input',                     'expect' ],
+            [ t.count,        [4,     4],                  /type not handled/  ],
+            [ t.count,        [new Uint8Array(2), false],  /type not handled/  ],
+            [ t.count,        ['abc', 4],                  /should be a string/  ],
+            [ t.count,        ['abc', ''],                 /zero-length string/  ],
+            [ t.count,        [new Uint8Array(2), 'aa'],   /long strings not supported/  ],
+            [ t.tableAssert,  [[['a'],[1]],,{plan:3}],     /plan has already been set/  ],  // tableAssert set default plan (1 per row)
+        ])
+        t.tableAssert(
+            tbl,
+            function(fn, input){ fn.apply(null, input) },
+            {assert: 'throws'}
+        )
+    })
+
+               
+As with other table tests, the test output includes revealing detail for every test:
+
+    # tape: tableAssert - assert throws
+    ok 69 : ('count',[4,4]) -expect-> ('/type not handled/')
+    ok 70 : ('count',[{'0':0,'1':0},false]) -expect-> ('/type not handled/')
+    ok 71 : ('count',['abc',4]) -expect-> ('/should be a string/')
+    ok 72 : ('count',['abc','"]) -expect-> ('/zero-length string/')
+    ok 73 : ('count',[{'0':0,'1':0},'aa']) -expect-> ('/long strings not supported/')
+    ok 74 : ('tableAssert',[[['a'],[1]],null,{'plan':3}]) -expect-> ('/plan has already been set/')
+
 
 
 ## t.desc()   "describe"
