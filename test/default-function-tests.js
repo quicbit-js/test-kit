@@ -174,25 +174,40 @@ function test_defaults(test) {
 
     test(test.engine + ': imatch', (t) => {
         t.tableAssert([
-            [ 's',     're',      'opt',                     'exp'               ],
-            [ '',      /x/,       null,                      [''],               ],
-            [ 'b',     /x/,       null,                      ['b'],              ],
-            [ 'b',     /b/,       null,                      [],                 ],
-            [ 'abc',   /b/,       null,                      ['a', 'c'],         ],
-            [ 'abb',   /b/,       null,                      ['a','b'],          ],
-            [ 'abb',   /b$/,      null,                      ['ab'],             ],
-            [ 'abb',   /..$/,      null,                     ['a'],              ],
-            [ 'abb',   /.*/,      null,                      [],                 ],
-            [ 'abcbb', /b/,       null,                      ['a', 'cbb'],       ],
-            [ 'bbb',   /b/g,      null,                      [],                 ],
-            [ 'abcbb', /b/g,      null,                      ['a', 'c'],         ],
-            [ 'abcbb', /b/g,      {return:'tuples'},         [[0,1], [2,1]],     ],
-            [ 'b',     /b/g,      {empties:'include'},       ['', ''],           ],
-            [ 'abb',   /.*/,      {empties:'include'},       ['', ''],           ],
-            [ 'abcbb', /b/g,      {empties:'include'},       ['a', 'c', '', '']  ],
-            [ 'abcbb', /x/g,      {no_match:'null'},          null               ],
-            [ 'abcbb', /b/g,      {empties:'include', return:'tuples'},  [ [0,1], [2,1], [4,0], [5,0] ]  ],
+            [ 's',     're',      'opt',                     'exp'                  ],
+            [ '',      /x/,       null,                      [],                    ],
+            [ 'b',     /x/,       null,                      ['b'],                 ],
+            [ 'b',     /b/,       null,                      [],                    ],
+            [ 'abc',   /b/,       null,                      ['a', 'c'],            ],
+            [ 'abb',   /b/,       null,                      ['a','b'],             ],
+            [ 'abb',   /b$/,      null,                      ['ab'],                ],
+            [ 'abb',   /..$/,      null,                     ['a'],                 ],
+            [ 'abb',   /.*/,      null,                      [],                    ],
+            [ 'abcbb', /b/,       null,                      ['a', 'cbb'],          ],
+            [ 'bbb',   /b/g,      null,                      [],                    ],
+            [ 'abcbb', /b/g,      null,                      ['a', 'c'],            ],
+            [ 'a%b%c', /%/g,      null,                      ['a', 'b', 'c'],       ],
+            [ 'abcbb', /b/g,      {return:'tuples'},         [[0,1], [2,1]],        ],
+            [ 'a%b%c', /%/g,      {return:'tuples'},         [[0,1], [2,1], [4,1]], ],
+            [ '',      /b/g,      {empties:'include'},       [''],                  ],
+            [ 'b',     /b/g,      {empties:'include'},       ['', ''],              ],
+            [ 'abb',   /.*/,      {empties:'include'},       ['', ''],              ],
+            [ 'abcbb', /b/g,      {empties:'include'},       ['a', 'c', '', ''],    ],
+            [ 'abcbb', /x/g,      {no_match:'null'},          null,                 ],
+            [ 'abcbb', /b/g,      {empties:'include', return:'tuples'},  [ [0,1], [2,1], [4,0], [5,0] ], ],
         ], t.imatch)
+    })
+
+    test(test.engine + ': ireplace', (t) => {
+        t.tableAssert([
+            [ 's',       're',      'fn_or_string',   'opt',            'exp'                 ],
+            [ 'b',       /b/,        'q',             null,             'b'                   ],
+            [ '',        /x/,        'q',             null,             ''                   ],
+            [ 'b',       /x/,        'q',             null,             'q'                   ],
+            [ 'abc',     /b/,        'q',             null,             'qbq'                   ],
+            [ 'a%c%d',  /%/,         'z',             null,             'z%z'                   ],
+            [ 'a%c%d',  /%/g,         'z',             null,             'z%z%z'                   ],
+        ], t.ireplace)
     })
 
     // test(test.engine + ': as_utf8', (t) => {

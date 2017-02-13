@@ -297,25 +297,6 @@ function utf8_to_str(a) {
     return (typeof Buffer === 'object') ? Buffer.from(a).toString() : utf8_to_str_legacy()
 }
 
-function ireplace(s, re, fn_or_string, opt) {
-    var fn = typeof fn_or_string === 'function' ? fn_or_string : ()=>fn_or_string
-    opt = Object.assign({}, opt)
-    opt.return = 'tuples'                 // other imatch options 'empty' and 'no_match' are client-controlled.
-    var m = imatch(s, re, opt)
-    if(m === null) {
-        return null     // opt.empty was 'null'
-    }
-    var ret = []
-    m.forEach((tpl, i) => {
-        var off = tpl[0], len = tpl[1]
-        var sub = fn(s.substr(off, len))
-        // if(i === 0 && ) {
-        //
-        // }
-    })
-    var res = m.map(fn)
-}
-
 // Inverse Match.
 // Using imatch can make code easier to understand than
 // code using complex regex (negative-lookahead etc).
@@ -358,12 +339,21 @@ function ireplace(s, re, fn_or_string, opt) {
 //
 //
 function imatch(s, re, opt) {
-    opt = opt || Object.assign({}, {empties: 'ignore', return: 'strings', no_match: 'string'})
+    opt = Object.assign({}, {empties: 'ignore', return: 'strings', no_match: 'string'}, opt)
+
+    var prep_result = (res) => {
+        if(opt.empties !== 'include') {
+            res = res.filter((tpl) => tpl[1] !== 0)
+        }
+        return opt.return === 'tuples' ? res : res.map((tpl) => s.substr(tpl[0], tpl[1]))
+    }
+
     var m = re.exec(s)
+
     if(!m) {
         switch(opt.no_match) {
             case 'null'   : return null
-            case 'string' : return [s]
+            case 'string' : return prep_result([[0, s.length]])
             case 'throw'  : // fall-through
             default       : throw Error(re.toString() + ' does not match string ' + s)
         }
@@ -377,11 +367,28 @@ function imatch(s, re, opt) {
     } while(re.lastIndex && (m = re.exec(s)) !== null)
 
     ret.push([off, s.length - off])
+    return prep_result(ret)
+}
 
-    if(opt.empties !== 'include') {
-        ret = ret.filter((tpl) => tpl[1] !== 0)
+function ireplace(s, re, fn_or_string, opt) {
+    var fn = typeof fn_or_string === 'function' ? fn_or_string : ()=>fn_or_string
+    opt = Object.assign({}, opt)
+    opt.return = 'tuples'                 // other imatch options 'empty' and 'no_match' are client-controlled.
+    var m = imatch(s, re, opt)
+    if(m === null) {
+        return null     // opt.empty was 'null'
     }
-    return opt.return === 'tuples' ? ret : ret.map((tpl) => s.substr(tpl[0], tpl[1]))
+    var ret = []
+    var off = 0
+    m.forEach((tpl) => {
+        var toff = tpl[0], tlen = tpl[1]
+        ret.push(s.substring(off, toff))        // matched portion   (added intact)
+        ret.push(fn(s, toff, tlen))             // unmatched portion (transformed)
+        off = toff + tlen
+    })
+    ret.push(s.substring(off, s.length))        // remaining matched portion
+
+    return ret.join('')
 }
 
 // Hector the Collector
@@ -424,6 +431,7 @@ let DEFAULT_FUNCTIONS = {
     desc:        () => desc,
     hector:      () => hector,
     imatch:      () => imatch,
+    ireplace:    () => ireplace,
     lines:       () => text_lines,
     plan:        (torig, tnew) => plan(torig, tnew),
     str:         () => str,
