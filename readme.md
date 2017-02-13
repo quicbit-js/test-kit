@@ -266,6 +266,68 @@ return the sum of the results of the function applied to each array value.  If s
 argument is a string or number, return the sum of that property of all items in the 
 array.
 
+## t.imatch()
+
+    imatch(s, regex, options)
+
+Return an inverse match of the given string.  That is, return all substrings (or ranges) that do 
+not match the regex.
+
+    imatch( 'abcbb', /b/ )   ->    [ 'a', 'cbb' ]
+    imatch( 'abcbb', /b/g )  ->    [ 'a', 'c' ]           // global match
+
+
+imatch can be easier to understand than regex using negative-lookahead.
+
+options:
+
+    empties :  'ignore' (default)  - return only strings between matches that have characters
+               'include'           - return the empty spaces between matches as empty strings
+
+    return :   'strings' (default) - return results as array of substrings
+               'tuples'            - return results as [ offset, length ] tuples
+
+    no_match : 'string' (default)  - when regex does not match, return the entire string as the only result in the array.
+               'null'              - when regex does not match any part of the string, return null
+               'error'             - when regex does not match, throw an error
+
+
+**Examples** 
+
+    imatch( 'abcbb', /b/g, {index:true} )  ->   [ [0,1], [2,1] ]
+
+    // include the zero-space "empties" around any matches (as strings or offset/length tuples):
+
+    imatch( 'b',     /b/g, {empties:'include'} )  ->                    [ '', '']
+    imatch( 'abcbb', /b/g, {empties:'include'} )  ->                    [ 'a', 'c', '', '' ]
+    imatch( 'abcbb', /b/g, {empties:'include', return:'tuples'} )  ->   [ [0,1], [2,1], [4,0], [5,0] ] ]
+
+    // unmatched expression returns the entire string by default:
+
+    imatch( 'b',     /a/ } ->  [ 'b' ]
+
+    // but can return null, or throw error, if preferred:
+
+    imatch( 'b', /a/, { no_match: 'null' } }
+    imatch( 'b', /a/, { no_match: 'error' } }
+    
+...more examples in [default-function-tests](https://github.com/quicbit-js/test-kit/blob/master/test/default-function-tests.js)
+
+
+## t.ireplace()
+
+    t.ireplace(s, regex, string_or_fn, opt)
+    
+Return a string with an inverse replacement - that is, replacement of parts of the string that
+did not match the given regex.
+
+    t.ireplace( 'a%F2b%D8%E6c', /%../, (s) => '%'+s.charCodeAt(0).toString(16) )  
+    
+    ... gives: '%61%F2%62%D8%E6%63'
+    
+Options for controlling substrings matched and no-match handling are the same as for imatch, 
+with the exception of the 'return' option which is ignored.
+    
 ## t.str()
 
     t.str(value)
@@ -303,12 +365,25 @@ interim blank lines and relative space-indentation.  (using first space-indented
 ## t.utf8()
 
     t.utf8(value)
+    
+Symmetrical with t.utf8_to_str()
 
 Return an array of UTF-8 encoded bytes for the given value which may be:
 
    * a unicode code point (integer), such as 0x10400 [DESERET CAPITAL LETTER LONG I](http://www.fileformat.info/info/unicode/char/10400/index.htm)
    * an array of unicode code points
    * a string
+   
+  
+
+## t.utf8_to_str()
+
+    t.utf8_to_str(utf8_buf_or_array)
+    
+Symmetrical with t.utf8()
+
+Return a string decoded from the given utf8 encoded bytes.
+
 
 ## t.type()
 

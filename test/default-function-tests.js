@@ -128,13 +128,16 @@ function test_defaults(test) {
     // I used tap test coverage to find cases and then add one-liners here to cover them.
     test(test.engine + ': tableAssert - assert throws', (t) => {
         let tbl = t.table([
-            [ 'fn',           'input',                     'expect' ],
-            [ 'count',        [4,     4],                  /type not handled/  ],
-            [ 'count',        [new Uint8Array(2), false],  /type not handled/  ],
-            [ 'count',        ['abc', 4],                  /should be a string/  ],
-            [ 'count',        ['abc', ''],                 /zero-length string/  ],
-            [ 'count',        [new Uint8Array(2), 'aa'],   /long strings not supported/  ],
-            [ 'tableAssert',  [[['a'],[1]],,{plan:3}],     /plan has already been set/  ],  // tableAssert set default plan (1 per row)
+            [ 'fn',           'input',                             'expect' ],
+            [ 'count',        [4,     4],                          /type not handled/  ],
+            [ 'count',        [new Uint8Array(2), false],          /type not handled/  ],
+            [ 'count',        ['abc', 4],                          /should be a string/  ],
+            [ 'count',        ['abc', ''],                         /zero-length string/  ],
+            [ 'count',        [new Uint8Array(2), 'aa'],           /long strings not supported/  ],
+            [ 'tableAssert',  [[['a'],[1]],,{plan:3}],             /plan has already been set/  ],  // tableAssert set default plan (1 per row)
+            [ 'imatch',       ['a%b%c',/X/,{no_match: 'throw'}],   /does not match/    ],
+            [ 'utf8',         [new Date()],                       /cannot encode non-array object/    ],
+            [ 'utf8',         [true],                             /cannot encode type/    ],
         ])
         t.tableAssert(
             tbl,
@@ -200,24 +203,46 @@ function test_defaults(test) {
 
     test(test.engine + ': ireplace', (t) => {
         t.tableAssert([
-            [ 's',       're',      'fn_or_string',   'opt',            'exp'                 ],
-            [ 'b',       /b/,        'q',             null,             'b'                   ],
-            [ '',        /x/,        'q',             null,             ''                   ],
-            [ 'b',       /x/,        'q',             null,             'q'                   ],
-            [ 'abc',     /b/,        'q',             null,             'qbq'                   ],
-            [ 'a%c%d',  /%/,         'z',             null,             'z%z'                   ],
-            [ 'a%c%d',  /%/g,         'z',             null,             'z%z%z'                   ],
+            [ 's',       're',       'fn_or_string',   'opt',               'exp'                 ],
+            [ 'b',       /b/,        'q',               null,                'b'                  ],
+            [ '',        /x/,        'q',               null,                ''                   ],
+            [ '',        /x/,        'q',              {no_match:'null'},    null                   ],
+            [ 'b',       /x/,        'q',               null,                'q'                  ],
+            [ 'abc',     /b/,        'q',               null,                'qbq'                ],
+            [ 'a%b%c',   /%/,        'z',               null,                'z%z'                ],
+            [ 'a%b%c',   /%/g,       'z',               null,                'z%z%z'              ],
+            [ 'a%bb%ccc',   /%/g,   (ss,o,s)=> '{'+ss+o+s.length+'}',  null, '{a08}%{bb28}%{ccc58}'    ],
+            [ 'a%F2b%D8%E6c',   /%../g, (s)=> '%'+s.charCodeAt(0).toString(16),  null, '%61%F2%62%D8%E6%63'    ],
         ], t.ireplace)
     })
 
-    // test(test.engine + ': as_utf8', (t) => {
-    //     t.tableAssert([
-    //         [ 'v',            'exp'         ],
-    //         [ 'a',            ['61']        ],
-    //         [ 'é',            ['C3','A9']   ],
-    //         [ 'é',            ['C3','A9']   ],
-    //     ], (v) => { return t.utf8(v).map((i) => i.toString(16).toUpperCase()) })  // hex strings easier to read
-    // })
+    test(test.engine + ': utf8', (t) => {
+        t.tableAssert([
+            [ 'v',                   'exp'                                  ],
+            [ 0x61,                  [0x61]                                 ],
+            [ 'abc\uD801\uDC00',     [0x61,0x62,0x63,0xF0,0x90,0x90,0x80]   ],
+            [ '在嚴寒的冬日裡',        [229,156,168,229,154,180,229,175,146,231,154,132,229,134,172,230,151,165,232,163,161] ],
+        ], t.utf8)
+
+    })
+
+    test(test.engine + ': utf8_to_str', (t) => {
+        t.tableAssert([
+            [ 'a',                                    'v',                    ],
+            [ [0x61],                                 'a',                     ],
+            [ [0x61,0x62,0x63,0xF0,0x90,0x90,0x80],  'abc\uD801\uDC00',        ],
+        ], t.utf8_to_str)
+    })
+
+    test(test.engine + ': utf8 and utf8_to_str in harmony and at peace with the world', (t) => {
+        t.tableAssert([
+            [ 'v',                                  'exp'               ],
+            [ '在嚴寒的冬日裡',                       '在嚴寒的冬日裡'      ],
+            [ 'abc𐐀defg,é',                         'abc𐐀defg,é'        ],
+            [ 'gîddñup𐂃!',                         'gîddñup𐂃!'       ],
+            [ 'ᄒ,ᅡ,ᆫ,한',                           'ᄒ,ᅡ,ᆫ,한'        ],
+        ], (v) => t.utf8_to_str(t.utf8(v)) )
+    })
 
     test(test.engine + ': lines', (t) => {
         t.plan(6)

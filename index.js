@@ -162,7 +162,7 @@ function table(data) {
 //                           // (string) if set to a column name, use that column as the expected plan count for each row (variable asserts)
 //                           // If set to zero, then don't call plan during tableAssert().
 //    }
-function tableAssert(torig, tnew) {
+function table_assert(torig, tnew) {
     return (dataOrTable, fn, opt) => {
         let tbl = tnew.table(dataOrTable)
         opt = Object.assign({}, opt)
@@ -261,83 +261,57 @@ function count(s, v) {
     }
 }
 
-function str_to_utf8_legacy(s) {
-    var enc = unescape(encodeURIComponent(s))
-    return enc.split('').map((c) => c.codePointAt(0))
-}
-
-function utf8_to_str_legacy(a) {
-    var dec = decodeURIComponent(escape())
-}
-
-
-// return an array of UTF-8 encoded bytes for the given value 'v'
+// Return an array of UTF-8 encoded bytes for the given value 'v'
 // v may be:
 //      an unicode code point, such as 0x10400 '𐐀'
 //      an array of code points
 //      a string
-function value_to_utf8(v) {
+function utf8(v) {
     switch(typeof v) {
         case 'number':
-            v = [v]
-        case 'object':                                          // fall-through...
-            v = v.map((c) => c.codePointAt(0))
-        case 'string':                                          // fall-through...
-            var enc = encodeURIComponent()
-            // return (typeof Buffer === 'object') ?
-            //     Array.prototype.slice.call(Buffer.from(v)) :        // node.js only
-            //     str_to_utf8_legacy(v)
+            v = [v]                                   // array of code points and fall through...
+
+        case 'object':
+            Array.isArray(v) || err('cannot encode non-array object ' + v)
+            v = String.fromCodePoint.apply(null, v)   // string and fall through...
+
+        case 'string':
+            // escape non-ascii as utf-8: 'abc\uD801\uDC00' -> 'abc%F0%90%90%80'
+            var enc = encodeURIComponent(v)
+            var ret = []
+            for(var i=0; i<enc.length;) {
+                if(enc[i] === '%') {
+                    ret.push(parseInt(enc.substr(i+1, 2), 16))  // hex
+                    i += 3
+                } else {
+                    ret.push(enc.charCodeAt(i++))               // ascii
+                }
+            }
+            return ret
         default:
             throw Error('cannot encode type ' + (typeof v))
     }
 }
 
-//
+// return javascript string for an array or buffer of utf-8
 function utf8_to_str(a) {
-    return (typeof Buffer === 'object') ? Buffer.from(a).toString() : utf8_to_str_legacy()
+    var parts = []
+    var i = 0
+    var len = a.length
+    while(i < len) {
+        var s = ''
+        while(i < len && a[i] < 0x80) {
+            s += String.fromCharCode(a[i++])    // ascii
+        }
+        while(i < len && a[i] >= 0x80) {
+            s += '%' + a[i++].toString(16)      // hex
+        }
+        parts.push(s)
+    }
+    return decodeURIComponent(parts.join(''))
 }
 
-// Inverse Match.
-// Using imatch can make code easier to understand than
-// code using complex regex (negative-lookahead etc).
-//
-// Return all the parts of a string that are not matched as substrings:
-//
-//     imatch( 'abcbb', /b/ )  ->    [ 'a', 'cbb' ]
-//     imatch( 'abcbb', /b/g )  ->   [ 'a', 'c' ]           // global match
-//
-// or as [offset, length] tuples:
-//
-//     imatch( 'abcbb', /b/g, {index:true} )  ->   [ [0,1], [2,1] ]
-//
-// with the option to include the zero-space "empties" around any matches (as strings or offset/length tuples):
-//
-//     imatch( 'b',     /b/g, {empties:'include'} )  ->                    [ '', '']
-//     imatch( 'abcbb', /b/g, {empties:'include'} )  ->                    [ 'a', 'c', '', '' ]
-//     imatch( 'abcbb', /b/g, {empties:'include', return:'tuples'} )  ->   [ [0,1], [2,1], [4,0], [5,0] ] ]
-//
-// A completely unmatched expression returns the entire string by default:
-//
-//     imatch( 'b',     /a/ } ->  [ 'b' ]
-//
-// But can return null, or throw error, if preferred:
-//
-//     imatch( 'b', /a/, { no_match: 'null' } }
-//     imatch( 'b', /a/, { no_match: 'error' } }
-//
-//
-// options:
-//     empties :  'ignore' (default)  - return only strings between matches that have characters
-//                'include'           - return the empty spaces between matches as empty strings
-//
-//     return :   'strings' (default) - return results as array of substrings
-//                'tuples'            - return results as [ offset, length ] tuples
-//
-//     no_match : 'string' (default)  - when regex does not match, return the entire string as the only result in the array.
-//                'null'              - when regex does not match any part of the string, return null
-//                'error'             - when regex does not match, throw an error
-//
-//
+// inverse match (see readme)
 function imatch(s, re, opt) {
     opt = Object.assign({}, {empties: 'ignore', return: 'strings', no_match: 'string'}, opt)
 
@@ -382,8 +356,8 @@ function ireplace(s, re, fn_or_string, opt) {
     var off = 0
     m.forEach((tpl) => {
         var toff = tpl[0], tlen = tpl[1]
-        ret.push(s.substring(off, toff))        // matched portion   (added intact)
-        ret.push(fn(s, toff, tlen))             // unmatched portion (transformed)
+        ret.push(s.substring(off, toff))              // matched portion   (added intact)
+        ret.push(fn(s.substr(toff, tlen), toff, s))   // unmatched portion (transform)
         off = toff + tlen
     })
     ret.push(s.substring(off, s.length))        // remaining matched portion
@@ -427,20 +401,20 @@ function desc(lbl, inp, out) {
 // object so they may invoke new or prior-defined functions (delegate).
 
 let DEFAULT_FUNCTIONS = {
-    count:       () => count,
-    desc:        () => desc,
-    hector:      () => hector,
-    imatch:      () => imatch,
-    ireplace:    () => ireplace,
-    lines:       () => text_lines,
-    plan:        (torig, tnew) => plan(torig, tnew),
-    str:         () => str,
-    sum:         () => sum,
-    table:       () => table,
-    tableAssert: (torig, tnew) => tableAssert(torig, tnew),
-    type:        () => type,
-    // value2utf8:  () => value2utf8,
-    // utf82value:  () => utf82value,
+    count:          () => count,
+    desc:           () => desc,
+    hector:         () => hector,
+    imatch:         () => imatch,
+    ireplace:       () => ireplace,
+    lines:          () => text_lines,
+    plan:           (torig, tnew) => plan(torig, tnew),
+    str:            () => str,
+    sum:            () => sum,
+    table:          () => table,
+    tableAssert:    (torig, tnew) => table_assert(torig, tnew),
+    type:           () => type,
+    utf8:           () => utf8,
+    utf8_to_str:    () => utf8_to_str,
 }
 
 function testfn(name_or_fn, custom_fns, opt) {
