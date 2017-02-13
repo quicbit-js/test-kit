@@ -368,18 +368,20 @@ function imatch(s, re, opt) {
             default       : throw Error(re.toString() + ' does not match string ' + s)
         }
     }
-    var inc_empty = opt.empties === 'include'
     var ret = []
     var off = 0
     do {
         var len = m.index - off
-        if(inc_empty || len > 0) { ret.push([off, len]) }
+        ret.push([off, len])
         off = m.index + m[0].length
     } while(re.lastIndex && (m = re.exec(s)) !== null)
 
-    if(inc_empty || s.length - off > 0) { ret.push([off, s.length - off]) }
+    ret.push([off, s.length - off])
 
-    return opt.return === 'tuples' ? ret : ret.map((ind) => s.substr(ind[0], ind[1]))
+    if(opt.empties !== 'include') {
+        ret = ret.filter((tpl) => tpl[1] !== 0)
+    }
+    return opt.return === 'tuples' ? ret : ret.map((tpl) => s.substr(tpl[0], tpl[1]))
 }
 
 // Hector the Collector

@@ -181,17 +181,17 @@ function test_defaults(test) {
             [ 'abc',   /b/,       null,                      ['a', 'c'],         ],
             [ 'abb',   /b/,       null,                      ['a','b'],          ],
             [ 'abb',   /b$/,      null,                      ['ab'],             ],
-            [ 'abb',   /..$/,      null,                     ['a'],             ],
-            [ 'abb',   /.*/,      null,                      [],                ],
+            [ 'abb',   /..$/,      null,                     ['a'],              ],
+            [ 'abb',   /.*/,      null,                      [],                 ],
             [ 'abcbb', /b/,       null,                      ['a', 'cbb'],       ],
             [ 'bbb',   /b/g,      null,                      [],                 ],
             [ 'abcbb', /b/g,      null,                      ['a', 'c'],         ],
             [ 'abcbb', /b/g,      {return:'tuples'},         [[0,1], [2,1]],     ],
             [ 'b',     /b/g,      {empties:'include'},       ['', ''],           ],
-            [ 'abb',   /.*/,      {empties:'include'},              ['', ''],                ],
-            [ 'abcbb', /b/g,      {empties:'include'},              ['a', 'c', '', '']     ],
-            [ 'abcbb', /b/g,      {empties:'include', return:'tuples'},  [ [0,1], [2,1], [4,0], [5,0] ]  ],
+            [ 'abb',   /.*/,      {empties:'include'},       ['', ''],           ],
+            [ 'abcbb', /b/g,      {empties:'include'},       ['a', 'c', '', '']  ],
             [ 'abcbb', /x/g,      {no_match:'null'},          null               ],
+            [ 'abcbb', /b/g,      {empties:'include', return:'tuples'},  [ [0,1], [2,1], [4,0], [5,0] ]  ],
         ], t.imatch)
     })
 
