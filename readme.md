@@ -268,7 +268,10 @@ array.
 
 ## t.str()
 
-A simple but crude string transform based on JSON.stringify()
+    t.str(value)
+    
+Returns a string representation of value.  A simple but crude string transform based on JSON.stringify()
+
 
 ## t.lines()
 
@@ -296,6 +299,16 @@ interim blank lines and relative space-indentation.  (using first space-indented
          '   with some indentation',
          'on some lines',
     ]
+    
+## t.utf8()
+
+    t.utf8(value)
+
+Return an array of UTF-8 encoded bytes for the given value which may be:
+
+   * a unicode code point (integer), such as 0x10400 [DESERET CAPITAL LETTER LONG I](http://www.fileformat.info/info/unicode/char/10400/index.htm)
+   * an array of unicode code points
+   * a string
 
 ## t.type()
 

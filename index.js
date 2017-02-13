@@ -261,6 +261,127 @@ function count(s, v) {
     }
 }
 
+function str_to_utf8_legacy(s) {
+    var enc = unescape(encodeURIComponent(s))
+    return enc.split('').map((c) => c.codePointAt(0))
+}
+
+function utf8_to_str_legacy(a) {
+    var dec = decodeURIComponent(escape())
+}
+
+
+// return an array of UTF-8 encoded bytes for the given value 'v'
+// v may be:
+//      an unicode code point, such as 0x10400 '𐐀'
+//      an array of code points
+//      a string
+function value_to_utf8(v) {
+    switch(typeof v) {
+        case 'number':
+            v = [v]
+        case 'object':                                          // fall-through...
+            v = v.map((c) => c.codePointAt(0))
+        case 'string':                                          // fall-through...
+            var enc = encodeURIComponent()
+            // return (typeof Buffer === 'object') ?
+            //     Array.prototype.slice.call(Buffer.from(v)) :        // node.js only
+            //     str_to_utf8_legacy(v)
+        default:
+            throw Error('cannot encode type ' + (typeof v))
+    }
+}
+
+//
+function utf8_to_str(a) {
+    return (typeof Buffer === 'object') ? Buffer.from(a).toString() : utf8_to_str_legacy()
+}
+
+function ireplace(s, re, fn_or_string, opt) {
+    var fn = typeof fn_or_string === 'function' ? fn_or_string : ()=>fn_or_string
+    opt = Object.assign({}, opt)
+    opt.return = 'tuples'                 // other imatch options 'empty' and 'no_match' are client-controlled.
+    var m = imatch(s, re, opt)
+    if(m === null) {
+        return null     // opt.empty was 'null'
+    }
+    var ret = []
+    m.forEach((tpl, i) => {
+        var off = tpl[0], len = tpl[1]
+        var sub = fn(s.substr(off, len))
+        // if(i === 0 && ) {
+        //
+        // }
+    })
+    var res = m.map(fn)
+}
+
+// Inverse Match.
+// Using imatch can make code easier to understand than
+// code using complex regex (negative-lookahead etc).
+//
+// Return all the parts of a string that are not matched as substrings:
+//
+//     imatch( 'abcbb', /b/ )  ->    [ 'a', 'cbb' ]
+//     imatch( 'abcbb', /b/g )  ->   [ 'a', 'c' ]           // global match
+//
+// or as [offset, length] tuples:
+//
+//     imatch( 'abcbb', /b/g, {index:true} )  ->   [ [0,1], [2,1] ]
+//
+// with the option to include the zero-space "empties" around any matches (as strings or offset/length tuples):
+//
+//     imatch( 'b',     /b/g, {empties:'include'} )  ->                    [ '', '']
+//     imatch( 'abcbb', /b/g, {empties:'include'} )  ->                    [ 'a', 'c', '', '' ]
+//     imatch( 'abcbb', /b/g, {empties:'include', return:'tuples'} )  ->   [ [0,1], [2,1], [4,0], [5,0] ] ]
+//
+// A completely unmatched expression returns the entire string by default:
+//
+//     imatch( 'b',     /a/ } ->  [ 'b' ]
+//
+// But can return null, or throw error, if preferred:
+//
+//     imatch( 'b', /a/, { no_match: 'null' } }
+//     imatch( 'b', /a/, { no_match: 'error' } }
+//
+//
+// options:
+//     empties :  'ignore' (default)  - return only strings between matches that have characters
+//                'include'           - return the empty spaces between matches as empty strings
+//
+//     return :   'strings' (default) - return results as array of substrings
+//                'tuples'            - return results as [ offset, length ] tuples
+//
+//     no_match : 'string' (default)  - when regex does not match, return the entire string as the only result in the array.
+//                'null'              - when regex does not match any part of the string, return null
+//                'error'             - when regex does not match, throw an error
+//
+//
+function imatch(s, re, opt) {
+    opt = opt || Object.assign({}, {empties: 'ignore', return: 'strings', no_match: 'string'})
+    var m = re.exec(s)
+    if(!m) {
+        switch(opt.no_match) {
+            case 'null'   : return null
+            case 'string' : return [s]
+            case 'throw'  : // fall-through
+            default       : throw Error(re.toString() + ' does not match string ' + s)
+        }
+    }
+    var inc_empty = opt.empties === 'include'
+    var ret = []
+    var off = 0
+    do {
+        var len = m.index - off
+        if(inc_empty || len > 0) { ret.push([off, len]) }
+        off = m.index + m[0].length
+    } while(re.lastIndex && (m = re.exec(s)) !== null)
+
+    if(inc_empty || s.length - off > 0) { ret.push([off, s.length - off]) }
+
+    return opt.return === 'tuples' ? ret : ret.map((ind) => s.substr(ind[0], ind[1]))
+}
+
 // Hector the Collector
 // Collected bits of string...
 // (http://belz.net/teaching/hector.html)
@@ -300,13 +421,16 @@ let DEFAULT_FUNCTIONS = {
     count:       () => count,
     desc:        () => desc,
     hector:      () => hector,
+    imatch:      () => imatch,
     lines:       () => text_lines,
+    plan:        (torig, tnew) => plan(torig, tnew),
     str:         () => str,
     sum:         () => sum,
     table:       () => table,
     tableAssert: (torig, tnew) => tableAssert(torig, tnew),
     type:        () => type,
-    plan:        (torig, tnew) => plan(torig, tnew)
+    // value2utf8:  () => value2utf8,
+    // utf82value:  () => utf82value,
 }
 
 function testfn(name_or_fn, custom_fns, opt) {

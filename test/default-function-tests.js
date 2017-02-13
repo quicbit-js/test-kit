@@ -172,6 +172,38 @@ function test_defaults(test) {
         ], t.type)
     })
 
+    test(test.engine + ': imatch', (t) => {
+        t.tableAssert([
+            [ 's',     're',      'opt',                     'exp'               ],
+            [ '',      /x/,       null,                      [''],               ],
+            [ 'b',     /x/,       null,                      ['b'],              ],
+            [ 'b',     /b/,       null,                      [],                 ],
+            [ 'abc',   /b/,       null,                      ['a', 'c'],         ],
+            [ 'abb',   /b/,       null,                      ['a','b'],          ],
+            [ 'abb',   /b$/,      null,                      ['ab'],             ],
+            [ 'abb',   /..$/,      null,                     ['a'],             ],
+            [ 'abb',   /.*/,      null,                      [],                ],
+            [ 'abcbb', /b/,       null,                      ['a', 'cbb'],       ],
+            [ 'bbb',   /b/g,      null,                      [],                 ],
+            [ 'abcbb', /b/g,      null,                      ['a', 'c'],         ],
+            [ 'abcbb', /b/g,      {return:'tuples'},         [[0,1], [2,1]],     ],
+            [ 'b',     /b/g,      {empties:'include'},       ['', ''],           ],
+            [ 'abb',   /.*/,      {empties:'include'},              ['', ''],                ],
+            [ 'abcbb', /b/g,      {empties:'include'},              ['a', 'c', '', '']     ],
+            [ 'abcbb', /b/g,      {empties:'include', return:'tuples'},  [ [0,1], [2,1], [4,0], [5,0] ]  ],
+            [ 'abcbb', /x/g,      {no_match:'null'},          null               ],
+        ], t.imatch)
+    })
+
+    // test(test.engine + ': as_utf8', (t) => {
+    //     t.tableAssert([
+    //         [ 'v',            'exp'         ],
+    //         [ 'a',            ['61']        ],
+    //         [ 'é',            ['C3','A9']   ],
+    //         [ 'é',            ['C3','A9']   ],
+    //     ], (v) => { return t.utf8(v).map((i) => i.toString(16).toUpperCase()) })  // hex strings easier to read
+    // })
+
     test(test.engine + ': lines', (t) => {
         t.plan(6)
         let lines = `
