@@ -1,16 +1,16 @@
 {
   "name": "test-kit",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "functions for writing concise tests",
   "homepage": "https://github.com/quicbit-js/test-kit",
   "url": "https://github.com/quicbit-js/test-kit/issues",
   "email": "support@quicbit.com",
   "repository": "quicbit-js/test-kit",
   "dependencies": {
-    "test-table": "^1.0.3"
+    "test-table": "^1.0.3",
+    "qb-utf8-b": "^1.0.0"
   },
   "devDependencies": {
-    "qb-utf8-b": "^1.0.0",
     "tap": "^5.7.0",
     "tape": "^4.6.2"
   },
