@@ -261,56 +261,6 @@ function count(s, v) {
     }
 }
 
-// Return an array of UTF-8 encoded bytes for the given value 'v'
-// v may be:
-//      an unicode code point, such as 0x10400 '𐐀'
-//      an array of code points
-//      a string
-function utf8(v) {
-    switch(typeof v) {
-        case 'number':
-            v = [v]                                   // array of code points and fall through...
-
-        case 'object':
-            Array.isArray(v) || err('cannot encode non-array object ' + v)
-            v = String.fromCodePoint.apply(null, v)   // string and fall through...
-
-        case 'string':
-            // escape non-ascii as utf-8: 'abc\uD801\uDC00' -> 'abc%F0%90%90%80'
-            var enc = encodeURIComponent(v)
-            var ret = []
-            for(var i=0; i<enc.length;) {
-                if(enc[i] === '%') {
-                    ret.push(parseInt(enc.substr(i+1, 2), 16))  // hex
-                    i += 3
-                } else {
-                    ret.push(enc.charCodeAt(i++))               // ascii
-                }
-            }
-            return ret
-        default:
-            throw Error('cannot encode type ' + (typeof v))
-    }
-}
-
-// return javascript string for an array or buffer of utf-8
-function utf8_to_str(a) {
-    var parts = []
-    var i = 0
-    var len = a.length
-    while(i < len) {
-        var s = ''
-        while(i < len && a[i] < 0x80) {
-            s += String.fromCharCode(a[i++])    // ascii
-        }
-        while(i < len && a[i] >= 0x80) {
-            s += '%' + a[i++].toString(16)      // hex
-        }
-        parts.push(s)
-    }
-    return decodeURIComponent(parts.join(''))
-}
-
 // inverse match (see readme)
 function imatch(s, re, opt) {
     opt = Object.assign({}, {empties: 'ignore', return: 'strings', no_match: 'string'}, opt)
@@ -413,8 +363,8 @@ let DEFAULT_FUNCTIONS = {
     table:          () => table,
     tableAssert:    (torig, tnew) => table_assert(torig, tnew),
     type:           () => type,
-    utf8:           () => utf8,
-    utf8_to_str:    () => utf8_to_str,
+    utf8:           () => require('qb-utf8-b').utf8,
+    utf8_to_str:    () => require('qb-utf8-b').utf8_to_str,
 }
 
 function testfn(name_or_fn, custom_fns, opt) {
