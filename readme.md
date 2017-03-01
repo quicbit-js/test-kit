@@ -327,15 +327,23 @@ did not match the given regex.
     
 Options for controlling substrings matched and no-match handling are the same as for imatch, 
 with the exception of the 'return' option which is ignored.
-    
-## t.str()
 
-    t.str(value)
+## t.padl( str, length, char )
+
+Return string <code>str</code> left-padded up to <code>length</code> characters using char as padding.
+char (defaults to single-space) can be and length-1 string.
     
+## t.padr( str, length, char )
+
+Return string <code>str</code> right-padded up to <code>length</code> characters using char as padding.
+char (defaults to single-space) can be and length-1 string.
+    
+## t.str( value )
+
 Returns a string representation of value.  A simple but crude string transform based on JSON.stringify()
 
 
-## t.lines()
+## t.lines( text )
 
 Easy capture of formatted text into string-array.
 
@@ -362,10 +370,8 @@ interim blank lines and relative space-indentation.  (using first space-indented
          'on some lines',
     ]
     
-## t.utf8()
+## t.utf8( value )
 
-    t.utf8(value)
-    
 Symmetrical with t.utf8_to_str()
 
 Return an array of UTF-8 encoded bytes for the given value which may be:
@@ -376,16 +382,14 @@ Return an array of UTF-8 encoded bytes for the given value which may be:
    
   
 
-## t.utf8_to_str()
+## t.utf8_to_str( utf8_buf_or_array )
 
-    t.utf8_to_str(utf8_buf_or_array)
-    
 Symmetrical with t.utf8()
 
 Return a string decoded from the given utf8 encoded bytes.
 
 
-## t.type()
+## t.type( value )
 
 Return the value type using Object.prototype.toString.  The implementation from index.js:
     

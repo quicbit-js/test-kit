@@ -147,14 +147,38 @@ function test_defaults(test) {
 
     test(test.engine + ': str', (t) => {
         t.tableAssert([
-            ['v', 'exp'],
-            [1, '1'],
-            [null, 'null'],
-            [[undefined], '[null]'],
-            [[1, 2], '[1,2]'],
-            [{a: 1, b: [null]}, "{'a':1,'b':[null]}"],
-            [undefined, 'null'],
+            [ 'v',                 'exp'                ],
+            [ 1,                    '1'                  ],
+            [ null,                 'null'               ],
+            [ [undefined],          '[null]'             ],
+            [ [1, 2],               '[1,2]'              ],
+            [ {a: 1, b: [null]},    "{'a':1,'b':[null]}" ],
+            [ undefined,            'null'               ],
         ], t.str)
+    })
+
+    test(test.engine + ': padl', (t) => {
+        t.tableAssert([
+            [ 'str',    'len',     'char',                  'exp' ],
+            [ '',       0,         null,                    ''    ],
+            [ '',       1,         null,                    ' '   ],
+            [ 'a',      0,         null,                    'a'   ],
+            [ 'a',      1,         null,                    'a'   ],
+            [ 'a',      2,         null,                    ' a'  ],
+            [ 'a',      3,         '.',                    '..a'  ],
+        ], t.padl)
+    })
+
+    test(test.engine + ': padl', (t) => {
+        t.tableAssert([
+            [ 'str',    'len',     'char',                  'exp' ],
+            [ '',       0,         null,                    ''    ],
+            [ '',       1,         null,                    ' '   ],
+            [ 'a',      0,         null,                    'a'   ],
+            [ 'a',      1,         null,                    'a'   ],
+            [ 'a',      2,         null,                    'a '  ],
+            [ 'a',      3,         '.',                     'a..' ],
+        ], t.padr)
     })
 
     test(test.engine + ': type', (t) => {
@@ -263,16 +287,23 @@ function test_defaults(test) {
             '',
             '...but with leading and trailing blank lines',
             'removed.'
-        ])
+        ], 'lines - long multiline test')
 
-        t.same(t.lines(''), [])
-        t.same(t.lines('hi') ['hi'])
-        t.same(t.lines('\nhi') ['hi'])
-        t.same(t.lines('hi\n') ['hi'])
-        t.same(t.lines('\n\n'), [])
+        let expected = t.table([
+            [ 'input',         'exp'        ],
+            [ '',               []          ],
+            [ '\n\t',           []          ],
+            [ 'hi',             ['hi']      ],
+            [ '\nhi',           ['hi']      ],
+            [ 'hi\n',           ['hi']      ],
+        ])
+        expected.rows.forEach(function(r) {
+            t.same(t.lines(r.input), r.exp, t.desc('lines', [r.input], r.exp))
+        })
     })
 
     test(test.engine + ': hector', (t) => {
+        // args for hector to collect as repeated function call arguments
         let args = [
             [null, 5, 'a'],
             [undefined, 7, 'b'],
@@ -282,7 +313,7 @@ function test_defaults(test) {
         ]
         let names = ['a0', 'a1', 'a2']
 
-        let tbl = t.table([
+        let expected = t.table([
             ['name', 'i', 'exp'],
             ['a0', 0, [null, undefined, {a: [2]}, undefined, {}]],
             ['a1', 1, [5, 7, 9, undefined, 11]],
@@ -290,13 +321,24 @@ function test_defaults(test) {
             ['foo', 3, [ undefined, undefined, undefined, undefined, undefined ]],
         ])
 
-        t.plan(tbl.length * 2)
-        tbl.rows.forEach(r => {
+        // hector with names
+        expected.rows.forEach(r => {
             let hec = t.hector(names)
             args.forEach(a => hec.apply(hec, a))
             t.same(hec.arg(r.i),    r.exp, t.desc('hector', [r.names,    r.i], r.exp))
             t.same(hec.arg(r.name), r.exp, t.desc('hector', [r.names, r.name], r.exp))
         })
+
+        // hector without names (name access returns array of undefined)
+        let undef = [ undefined, undefined, undefined, undefined, undefined ]
+        expected.rows.forEach(r => {
+            let hec = t.hector()
+            args.forEach(a => hec.apply(hec, a))
+            t.same(hec.arg(r.i),    r.exp, t.desc('hector', [r.names,    r.i], r.exp))
+            t.same(hec.arg(r.name), undef, t.desc('hector', [r.names, r.name], undef))
+        })
+
+        t.end()
     })
 
 

@@ -73,10 +73,12 @@ function str(v) {
     if(v === undefined) return 'null'
     return JSON.stringify(v).replace(/([^\\])"/g, "$1'").replace(/\\"/g, '"')
 }
+
 function parens(args) {
     var ret = str(args)
     return '(' + ret.substr(1, ret.length-2) + ')'
 }
+
 // function escape_re(s) {
 //     s = s.replace(/[-[\]{}()+?.,\\^$|#]/g, '\\$&')  // escape everything except '*'
 //     return s.replace(/[*]/g, '.*')
@@ -332,7 +334,7 @@ function hector(names) {
     ret.arg = function arg(which) {
         let i = which
         if(typeof i === 'string') {
-            i = names ? names.indexOf(which) : -1
+            i = names ? names.indexOf(which) : -1   // no names will return array of undefined
         }
         return args.map( (list) => list[i] )
     }
@@ -357,14 +359,16 @@ let DEFAULT_FUNCTIONS = {
     imatch:         () => imatch,
     ireplace:       () => ireplace,
     lines:          () => text_lines,
+    padl:           () => (s,l,c) => { c = c || ' '; while( s.length<l ) s = c+s; return s },
+    padr:           () => (s,l,c) => { c = c || ' '; while( s.length<l ) s = s+c; return s },
     plan:           (torig, tnew) => plan(torig, tnew),
     str:            () => str,
     sum:            () => sum,
     table:          () => table,
     tableAssert:    (torig, tnew) => table_assert(torig, tnew),
     type:           () => type,
-    utf8:           () => require('qb-utf8-b').utf8,
-    utf8_to_str:    () => require('qb-utf8-b').utf8_to_str,
+    utf8:           () => require('qb-utf8-ez').buffer,
+    utf8_to_str:    () => require('qb-utf8-ez').string,
 }
 
 function testfn(name_or_fn, custom_fns, opt) {
