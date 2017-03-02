@@ -21,10 +21,12 @@ class TestRunner {
         })
     }
     addTest(args, only) {
-        if(this.running) { throw Error('cannot add test - already running') }
+        if(this.running) {
+            throw Error('cannot add test - already running')
+        }
         if(only) {
             if(this.only_called) {
-                throw Error('two calls to only()')
+                throw Error('there can only be one only test')
             }
             this.only_called = true
             this.args = [args]
