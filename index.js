@@ -46,7 +46,7 @@ TestRunner.prototype = {
 //
 function enrich_test_arguments(args, enrich_fns) {
     args = [...args]
-    var fi = args.findIndex(a => typeof(a) == 'function')
+    var fi = args.findIndex(function(a) { return typeof(a) == 'function' } )
     args[fi] = enrich_t(args[fi], enrich_fns)
     return args
 }
@@ -58,7 +58,7 @@ function enrich_t(fn, enrich_fns) {
     return function(torig) {
         var tnew = Object.create(torig)
         var funcnames = Object.keys(enrich_fns)
-        funcnames.forEach(n => { tnew[n] = enrich_fns[n](torig, tnew) })
+        funcnames.forEach(function(n) { tnew[n] = enrich_fns[n](torig, tnew) })
         fn(tnew)
     }
 }
@@ -275,7 +275,7 @@ function imatch(s, re, opt) {
         if(opt.empties !== 'include') {
             res = res.filter( function(tpl) { return tpl[1] !== 0 } )
         }
-        return opt.return === 'tuples' ? res : res.map( function(tpl) { s.substr(tpl[0], tpl[1]) } )
+        return opt.return === 'tuples' ? res : res.map( function(tpl) { return s.substr(tpl[0], tpl[1]) } )
     }
 
     var m = re.exec(s)
