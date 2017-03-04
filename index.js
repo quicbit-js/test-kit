@@ -2,15 +2,17 @@
 
 // collects test argument and executes them later (on timeout) according to whether 'only'
 // was called or not.
-class TestRunner {
-    constructor(test_fn, enrich_fns) {
-        this.args = []
-        this.only_called = false
-        this.running = false
-        this.test_fn = test_fn
-        this.enrich_fns = Object.assign({}, enrich_fns)
-    }
-    run() {
+function TestRunner(test_fn, enrich_fns) {
+    this.args = []
+    this.only_called = false
+    this.running = false
+    this.test_fn = test_fn
+    this.enrich_fns = Object.assign({}, enrich_fns)
+}
+
+TestRunner.prototype = {
+    constructor: TestRunner,
+    run: function() {
         var self = this
         setTimeout(function () {
             if(this.running) { throw Error('already running') }
@@ -19,8 +21,8 @@ class TestRunner {
                 self.test_fn(...enrich_test_arguments(a, self.enrich_fns))
             })
         })
-    }
-    addTest(args, only) {
+    },
+    addTest: function(args, only) {
         if(this.running) {
             throw Error('cannot add test - already running')
         }
@@ -44,7 +46,7 @@ class TestRunner {
 //
 function enrich_test_arguments(args, enrich_fns) {
     args = [...args]
-    let fi = args.findIndex(a => typeof(a) == 'function')
+    var fi = args.findIndex(a => typeof(a) == 'function')
     args[fi] = enrich_t(args[fi], enrich_fns)
     return args
 }
@@ -54,8 +56,8 @@ function enrich_test_arguments(args, enrich_fns) {
 // 'fn' is the user function that we will call with the new enriched 't':  fn(t)
 function enrich_t(fn, enrich_fns) {
     return function(torig) {
-        let tnew = Object.create(torig)
-        let funcnames = Object.keys(enrich_fns)
+        var tnew = Object.create(torig)
+        var funcnames = Object.keys(enrich_fns)
         funcnames.forEach(n => { tnew[n] = enrich_fns[n](torig, tnew) })
         fn(tnew)
     }
@@ -110,15 +112,15 @@ function parens(args) {
 // ]
 //
 function text_lines(s) {
-    let lines = s.split('\n')
+    var lines = s.split('\n')
 
     for(var beg=0; beg < lines.length &&    /^\s*$/.test(lines[beg]); beg++);
     for(var end=lines.length-1; end >= 0 && /^\s*$/.test(lines[end]); end--);
     if(beg > end) { return [] }
-    let ind = countws(lines[beg])
-    for(let i=beg; i<=end; i++) {
-        let line = lines[i]
-        let ws = countws(line, ind)
+    var ind = countws(lines[beg])
+    for(var i=beg; i<=end; i++) {
+        var line = lines[i]
+        var ws = countws(line, ind)
         lines[i] = ws === line.length ? '' : line.substring(Math.min(ws, ind))
     }
     return lines.slice(beg, end+1)
@@ -168,7 +170,7 @@ function table(data) {
 //    }
 function table_assert(torig, tnew) {
     return (dataOrTable, fn, opt) => {
-        let tbl = tnew.table(dataOrTable)
+        var tbl = tnew.table(dataOrTable)
         opt = Object.assign({}, opt)
         if(opt.plan == null) {
             opt.plan = tnew.planned_tests ? 0 : 1
@@ -210,7 +212,7 @@ function err(msg) {
 }
 
 function type(v) {
-    let ret = Object.prototype.toString.call(v)
+    var ret = Object.prototype.toString.call(v)
     return ret.substring(8, ret.length-1).toLowerCase()
 }
 
@@ -225,12 +227,12 @@ function countstr(s, v) {
     type(v) === 'string' || err('value should be a string: ' + type(v))
     v.length > 0 || err('cannot count zero-length string')
 
-    let c=0;
+    var c = 0, i = 0
     if(v.length === 1) {
-        let len = s.length
-        for(let i=0; i<len; i++) { if(s[i] === v) c++ }
+        var len = s.length
+        for(i=0; i<len; i++) { if(s[i] === v) c++ }
     } else {
-        for(let i=s.indexOf(v); i !== -1; i=s.indexOf(v, i+1)) { c++ }
+        for(i=s.indexOf(v); i !== -1; i=s.indexOf(v, i+1)) { c++ }
     }
     return c
 }
@@ -246,8 +248,8 @@ function countbuf(b, v) {
         default:
             throw Error('type not handled: ' + type(v))
     }
-    let c = 0, len = b.length
-    for(let i=0; i<len; i++) { if(b[i] === v) c++ }
+    var c = 0, len = b.length
+    for(var i=0; i<len; i++) { if(b[i] === v) c++ }
     return c
 }
 
@@ -326,15 +328,15 @@ function ireplace(s, re, fn_or_string, opt) {
 // Return a callback function that collects callback arguments in the 'args' array, provides access to
 // columns of results with the arg(i) function.  also supports args('name') if names are provided.
 function hector(names) {
-    let args = []
-    let max_num_args = 0
-    let ret = function() {
+    var args = []
+    var max_num_args = 0
+    var ret = function() {
         args.push([...arguments])
         max_num_args = arguments.length > max_num_args ? arguments.length : max_num_args
     }
     ret.args = args                             // make args a simple/visible property
     ret.arg = function arg(which) {
-        let i = which
+        var i = which
         if(typeof i === 'string') {
             i = names ? names.indexOf(which) : -1   // no names will return array of undefined
         }
@@ -354,7 +356,7 @@ function desc(lbl, inp, out) {
 // Creation functions are passed the original test object and the new test
 // object so they may invoke new or prior-defined functions (delegate).
 
-let DEFAULT_FUNCTIONS = {
+var DEFAULT_FUNCTIONS = {
     count:          () => count,
     desc:           () => desc,
     hector:         () => hector,
@@ -375,10 +377,10 @@ let DEFAULT_FUNCTIONS = {
 
 function testfn(name_or_fn, custom_fns, opt) {
     opt = opt || {custom_only: false}
-    let enrich_fns = Object.assign({},  opt.custom_only ? {} : DEFAULT_FUNCTIONS, custom_fns )
-    let ret
+    var enrich_fns = Object.assign({},  opt.custom_only ? {} : DEFAULT_FUNCTIONS, custom_fns )
+    var ret
 
-    let test_orig = name_or_fn
+    var test_orig = name_or_fn
     if(typeof name_or_fn === 'string') {
         test_orig = require(name_or_fn).test || err(name_or_fn + ' has no test function')
     }
@@ -386,7 +388,7 @@ function testfn(name_or_fn, custom_fns, opt) {
         ret =      function() { return      test_orig(...enrich_test_arguments(arguments, enrich_fns )) }
         ret.only = function() { return test_orig.only(...enrich_test_arguments(arguments, enrich_fns )) }
     } else {
-        let runner = new TestRunner(test_orig, enrich_fns)
+        var runner = new TestRunner(test_orig, enrich_fns)
         ret =      function() { runner.addTest(arguments, false) }
         ret.only = function() { runner.addTest(arguments, true) }
         runner.run()
@@ -394,7 +396,7 @@ function testfn(name_or_fn, custom_fns, opt) {
     ret.engine = test_orig.only && test_orig.onFinish ? 'tape' : 'tap'  // just a guess by what is likely
     Object.keys(test_orig).forEach((k) => {
         if(!ret[k]) {
-            let orig = test_orig[k]
+            var orig = test_orig[k]
             if(typeof orig === 'function') {
                 ret[k] = function() {return orig.apply(test_orig, arguments)}  // call function with original context
             } else {
