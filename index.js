@@ -18,7 +18,7 @@ TestRunner.prototype = {
             if(this.running) { throw Error('already running') }
             self.running = true
             self.args.forEach(function (a) {
-                self.test_fn(...enrich_test_arguments(a, self.enrich_fns))
+                self.test_fn.apply(null, enrich_test_arguments(a, self.enrich_fns))
             })
         })
     },
@@ -45,7 +45,7 @@ TestRunner.prototype = {
 //      test('mytest', function(t) {...} )
 //
 function enrich_test_arguments(args, enrich_fns) {
-    args = [...args]
+    args = Array.prototype.slice.call(args)
     var fi = args.findIndex(function(a) { return typeof(a) == 'function' } )
     args[fi] = enrich_t(args[fi], enrich_fns)
     return args
@@ -331,7 +331,7 @@ function hector(names) {
     var args = []
     var max_num_args = 0
     var ret = function() {
-        args.push([...arguments])
+        args.push(Array.prototype.slice.call(arguments))
         max_num_args = arguments.length > max_num_args ? arguments.length : max_num_args
     }
     ret.args = args                             // make args a simple/visible property
@@ -385,8 +385,8 @@ function testfn(name_or_fn, custom_fns, opt) {
         test_orig = require(name_or_fn).test || err(name_or_fn + ' has no test function')
     }
     if(test_orig.only) {
-        ret =      function() { return      test_orig(...enrich_test_arguments(arguments, enrich_fns )) }
-        ret.only = function() { return test_orig.only(...enrich_test_arguments(arguments, enrich_fns )) }
+        ret =      function() { return      test_orig.apply(null, enrich_test_arguments(arguments, enrich_fns )) }
+        ret.only = function() { return test_orig.only.apply(null, enrich_test_arguments(arguments, enrich_fns )) }
     } else {
         var runner = new TestRunner(test_orig, enrich_fns)
         ret =      function() { runner.addTest(arguments, false) }
