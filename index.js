@@ -133,11 +133,11 @@ function countws(s) {
 
 function sum(a, prop_or_func) {
     if(prop_or_func == null) {
-        return a.reduce((s,v) => s + (v || 0), 0)
+        return a.reduce( function(s,v) { return s + (v || 0) }, 0)
     } else if(typeof prop_or_func === 'function') {
-        return a.reduce((s,v) => s + prop_or_func(v), 0)
+        return a.reduce( function(s,v) { return s + prop_or_func(v) }, 0)
     } else {
-        return a.reduce((s,v) => s + (v[prop_or_func] || 0), 0)
+        return a.reduce( function(s,v) { return s + (v[prop_or_func] || 0) }, 0)
     }
 }
 
@@ -156,7 +156,7 @@ function table(data) {
 //                              //    will be asserted using t.same().  IOW, for each row, assert.same(fn(first-n-values), last-value)
 //                 'throws',    // all columns but the last are inputs to fn, and the last column is
 //                              //    a string or regular expression that should match an expected error
-//                              //    using t.throws(() => {fn(first-n-values)}, last-value)
+//                              //    using t.throws( function() { {fn(first-n-values)}, last-value)
 //                 'none',      // Execute fn(all-column-values), without asserting fn output (fn should do asserts itself)
 //                 anything else.... works like same but using whatever assert function is applied to assert the last column value.
 //
@@ -169,7 +169,7 @@ function table(data) {
 //                           // If set to zero, then don't call plan during tableAssert().
 //    }
 function table_assert(torig, tnew) {
-    return (dataOrTable, fn, opt) => {
+    return  function(dataOrTable, fn, opt) {
         var tbl = tnew.table(dataOrTable)
         opt = Object.assign({}, opt)
         if(opt.plan == null) {
@@ -189,7 +189,7 @@ function table_assert(torig, tnew) {
         }
 
         var assert = opt.assert || 'same'
-        tbl.rows.forEach((r) => {
+        tbl.rows.forEach( function(r) {
             var vals = r._vals
             var exp_val
             if(assert === 'none') {
@@ -271,11 +271,11 @@ function count(s, v) {
 function imatch(s, re, opt) {
     opt = Object.assign({}, {empties: 'ignore', return: 'strings', no_match: 'string'}, opt)
 
-    var prep_result = (res) => {
+    var prep_result =  function(res) {
         if(opt.empties !== 'include') {
-            res = res.filter((tpl) => tpl[1] !== 0)
+            res = res.filter( function(tpl) { return tpl[1] !== 0 } )
         }
-        return opt.return === 'tuples' ? res : res.map((tpl) => s.substr(tpl[0], tpl[1]))
+        return opt.return === 'tuples' ? res : res.map( function(tpl) { s.substr(tpl[0], tpl[1]) } )
     }
 
     var m = re.exec(s)
@@ -301,7 +301,7 @@ function imatch(s, re, opt) {
 }
 
 function ireplace(s, re, fn_or_string, opt) {
-    var fn = typeof fn_or_string === 'function' ? fn_or_string : ()=>fn_or_string
+    var fn = typeof fn_or_string === 'function' ? fn_or_string :  function() { return fn_or_string }
     opt = Object.assign({}, opt)
     opt.return = 'tuples'                 // other imatch options 'empty' and 'no_match' are client-controlled.
     var m = imatch(s, re, opt)
@@ -310,7 +310,7 @@ function ireplace(s, re, fn_or_string, opt) {
     }
     var ret = []
     var off = 0
-    m.forEach((tpl) => {
+    m.forEach( function(tpl) {
         var toff = tpl[0], tlen = tpl[1]
         ret.push(s.substring(off, toff))              // matched portion   (added intact)
         ret.push(fn(s.substr(toff, tlen), toff, s))   // unmatched portion (transform)
@@ -340,7 +340,7 @@ function hector(names) {
         if(typeof i === 'string') {
             i = names ? names.indexOf(which) : -1   // no names will return array of undefined
         }
-        return args.map( (list) => list[i] )
+        return args.map(  function(list) { return list[i] } )
     }
     return ret
 }
@@ -357,22 +357,22 @@ function desc(lbl, inp, out) {
 // object so they may invoke new or prior-defined functions (delegate).
 
 var DEFAULT_FUNCTIONS = {
-    count:          () => count,
-    desc:           () => desc,
-    hector:         () => hector,
-    imatch:         () => imatch,
-    ireplace:       () => ireplace,
-    lines:          () => text_lines,
-    padl:           () => (s,l,c) => { c = c || ' '; while( s.length<l ) s = c+s; return s },
-    padr:           () => (s,l,c) => { c = c || ' '; while( s.length<l ) s = s+c; return s },
-    plan:           (torig, tnew) => plan(torig, tnew),
-    str:            () => str,
-    sum:            () => sum,
-    table:          () => table,
-    tableAssert:    (torig, tnew) => table_assert(torig, tnew),
-    type:           () => type,
-    utf8:           () => require('qb-utf8-ez').buffer,
-    utf8_to_str:    () => require('qb-utf8-ez').string,
+    count:           function() { return count      } ,
+    desc:            function() { return desc       } ,
+    hector:          function() { return hector     } ,
+    imatch:          function() { return imatch     } ,
+    ireplace:        function() { return ireplace   } ,
+    lines:           function() { return text_lines } ,
+    padl:            function() { return function(s,l,c) { c = c || ' '; while( s.length<l ) s = c+s; return s } },
+    padr:            function() { return function(s,l,c) { c = c || ' '; while( s.length<l ) s = s+c; return s } },
+    plan:            function(torig, tnew) { return plan(torig, tnew) },
+    str:             function() { return str   },
+    sum:             function() { return sum   },
+    table:           function() { return table },
+    tableAssert:     function(torig, tnew) { return table_assert(torig, tnew) },
+    type:            function() { return type },
+    utf8:            function() { return require('qb-utf8-ez').buffer },
+    utf8_to_str:     function() { return require('qb-utf8-ez').string },
 }
 
 function testfn(name_or_fn, custom_fns, opt) {
@@ -394,7 +394,7 @@ function testfn(name_or_fn, custom_fns, opt) {
         runner.run()
     }
     ret.engine = test_orig.only && test_orig.onFinish ? 'tape' : 'tap'  // just a guess by what is likely
-    Object.keys(test_orig).forEach((k) => {
+    Object.keys(test_orig).forEach( function(k) {
         if(!ret[k]) {
             var orig = test_orig[k]
             if(typeof orig === 'function') {
