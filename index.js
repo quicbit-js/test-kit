@@ -7,7 +7,7 @@ function TestRunner(test_fn, enrich_fns) {
     this.only_called = false
     this.running = false
     this.test_fn = test_fn
-    this.enrich_fns = Object.assign({}, enrich_fns)
+    this.enrich_fns = assign({}, enrich_fns)
 }
 
 TestRunner.prototype = {
@@ -171,7 +171,7 @@ function table(data) {
 function table_assert(torig, tnew) {
     return  function(dataOrTable, fn, opt) {
         var tbl = tnew.table(dataOrTable)
-        opt = Object.assign({}, opt)
+        opt = assign({}, opt)
         if(opt.plan == null) {
             opt.plan = tnew.planned_tests ? 0 : 1
         } else {
@@ -300,9 +300,25 @@ function imatch(s, re, opt) {
     return prep_result(ret)
 }
 
+// a simpler version of Object.assign but just copies normal properties
+function assign() {
+    var dst = Object(arguments[0] || err('no destination for assign'))
+    for (var i = 1; i < arguments.length; i++) {
+        var src = arguments[i]
+        if (src != null) {
+            for (var k in src) {
+                if (Object.prototype.hasOwnProperty.call(src, k)) {
+                    dst[k] = src[k]
+                }
+            }
+        }
+    }
+    return dst
+}
+
 function ireplace(s, re, fn_or_string, opt) {
     var fn = typeof fn_or_string === 'function' ? fn_or_string :  function() { return fn_or_string }
-    opt = Object.assign({}, opt)
+    opt = assign({}, opt)
     opt.return = 'tuples'                 // other imatch options 'empty' and 'no_match' are client-controlled.
     var m = imatch(s, re, opt)
     if(m === null) {
@@ -377,7 +393,7 @@ var DEFAULT_FUNCTIONS = {
 
 function testfn(name_or_fn, custom_fns, opt) {
     opt = opt || {custom_only: false}
-    var enrich_fns = Object.assign({},  opt.custom_only ? {} : DEFAULT_FUNCTIONS, custom_fns )
+    var enrich_fns = assign({},  opt.custom_only ? {} : DEFAULT_FUNCTIONS, custom_fns )
     var ret
 
     var test_orig = name_or_fn
