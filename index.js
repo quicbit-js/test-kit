@@ -15,7 +15,6 @@ TestRunner.prototype = {
     run: function() {
         var self = this
         setTimeout(function () {
-            if(this.running) { throw Error('already running') }
             self.running = true
             self.args.forEach(function (a) {
                 self.test_fn.apply(null, enrich_test_arguments(a, self.enrich_fns))
@@ -300,17 +299,13 @@ function imatch(s, re, opt) {
     return prep_result(ret)
 }
 
-// a simpler version of Object.assign but just copies normal properties
+// a simple and limited version of Object.assign for options - copies normal properties
 function assign() {
-    var dst = Object(arguments[0] || err('no destination for assign'))
+    var dst = Object(arguments[0])
     for (var i = 1; i < arguments.length; i++) {
         var src = arguments[i]
         if (src != null) {
-            for (var k in src) {
-                if (Object.prototype.hasOwnProperty.call(src, k)) {
-                    dst[k] = src[k]
-                }
-            }
+            Object.keys(src).forEach(function(k) { dst[k] = src[k] })
         }
     }
     return dst
@@ -398,7 +393,7 @@ function testfn(name_or_fn, custom_fns, opt) {
 
     var test_orig = name_or_fn
     if(typeof name_or_fn === 'string') {
-        test_orig = require(name_or_fn).test || err(name_or_fn + ' has no test function')
+        test_orig = require(name_or_fn).test
     }
     if(test_orig.only) {
         ret =      function() { return      test_orig.apply(null, enrich_test_arguments(arguments, enrich_fns )) }
