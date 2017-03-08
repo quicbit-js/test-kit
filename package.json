@@ -1,14 +1,14 @@
 {
   "name": "test-kit",
   "version": "2.0.1",
-  "description": "functions for writing concise tests",
+  "description": "An improved data-driven test experience using tap or tape",
   "homepage": "https://github.com/quicbit-js/test-kit",
   "url": "https://github.com/quicbit-js/test-kit/issues",
   "email": "support@quicbit.com",
   "repository": "quicbit-js/test-kit",
   "dependencies": {
     "qb-utf8-ez": "^2.0.3",
-    "test-table": "^1.0.3"
+    "test-table": "^1.1.0"
   },
   "devDependencies": {
     "tap": "^5.7.0",

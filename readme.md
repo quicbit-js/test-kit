@@ -1,7 +1,10 @@
 # test-kit
 
-Enrich [tape](https://github.com/substack/tape) or 
-[(node-)tap](https://github.com/tapjs/node-tap) with productivity functions.  
+An improved data-driven test experience using [tap](https://github.com/tapjs/node-tap) 
+or [tape](https://github.com/substack/tape).
+
+Enriches tape or tap (your choice) with productivity functions.  Most notable is probably
+tableAssert(), which can greatly decrease test clutter. 
 
 test-kit adds new functions to the callback argument 
 (named 't', below), where they are most accessible in your tests.  
