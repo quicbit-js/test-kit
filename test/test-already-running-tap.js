@@ -1,13 +1,11 @@
 var test = require('tape')
 
-var testkit = require('..')
-var taptest = testkit.tap()
+var taptest = require('..')(function() {})
 
 test('already-running', function (t) {
     t.throws(function() {
-        taptest('outer', function (tt) {
-            taptest('inner', (tt) => {
-            })
+        taptest('outer', function () {
+            taptest('inner', () => {})
         })
     }, '/cannot add .* already running/' )
     t.end()
