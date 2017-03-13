@@ -1,12 +1,11 @@
 # test-kit
 
 [![npm][npm-image]][npm-url]
-[![downloads][downloads-image]][downloads-url]
+[![downloads][downloads-image]][npm-url]
 
-[npm-image]: https://img.shields.io/npm/v/test-kit.svg
-[npm-url]: https://npmjs.org/package/test-kit
+[npm-image]:       https://img.shields.io/npm/v/test-kit.svg
 [downloads-image]: https://img.shields.io/npm/dm/test-kit.svg
-[downloads-url]: https://npmjs.org/package/test-kit
+[npm-url]:         https://npmjs.org/package/test-kit
 
 An improved data-driven test experience using [tap](https://github.com/tapjs/node-tap) 
 or [tape](https://github.com/substack/tape).
