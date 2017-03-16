@@ -2,10 +2,25 @@
 
 [![npm][npm-image]][npm-url]
 [![downloads][downloads-image]][npm-url]
+[![bitHound Dependencies][proddep-image]][proddep-link]
+[![dev dependencies][devdep-image]][devdep-link]
+[![code analysis][code-image]][code-link]
+
 
 [npm-image]:       https://img.shields.io/npm/v/test-kit.svg
 [downloads-image]: https://img.shields.io/npm/dm/test-kit.svg
 [npm-url]:         https://npmjs.org/package/test-kit
+
+[proddep-image]:   https://www.bithound.io/github/quicbit-js/test-kit/badges/dependencies.svg
+[proddep-link]:    https://www.bithound.io/github/quicbit-js/test-kit/master/dependencies/npm
+[devdep-image]:    https://www.bithound.io/github/quicbit-js/test-kit/badges/devDependencies.svg
+[devdep-link]:     https://www.bithound.io/github/quicbit-js/test-kit/master/dependencies/npm
+[code-image]:      https://www.bithound.io/github/quicbit-js/test-kit/badges/code.svg
+[code-link]:       https://www.bithound.io/github/quicbit-js/test-kit
+
+A very simple table for data-driven testing.  test-table is provided through
+[quicbit-js/test-kit](http://github.com/quicbit-js/test-kit), but can be 
+used independently as well.
 
 An improved data-driven test experience using [tap](https://github.com/tapjs/node-tap) 
 or [tape](https://github.com/substack/tape).
@@ -16,6 +31,9 @@ tableAssert(), which can greatly decrease test clutter.
 test-kit adds new functions to the callback argument 
 (named 't', below), where they are most accessible in your tests.  
 You can simply use the functions provided by test-kit or specify your own.
+
+**Complies with the 100% test coverage and minimum dependency requirements** of 
+[qb-standard](http://github.com/quicbit-js/qb-standard) . 
 
 ## Install
 
