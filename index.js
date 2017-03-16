@@ -380,7 +380,8 @@ var DEFAULT_FUNCTIONS = {
     str:             function() { return str   },
     sum:             function() { return sum   },
     table:           function() { return table },
-    tableAssert:     function(torig, tnew) { return table_assert(torig, tnew) },
+    tableAssert:     function(torig, tnew) { return table_assert(torig, tnew) },    // backward-compatibility
+    table_assert:    function(torig, tnew) { return table_assert(torig, tnew) },
     type:            function() { return type },
     utf8:            function() { return require('qb-utf8-ez').buffer },
     utf8_to_str:     function() { return require('qb-utf8-ez').string },

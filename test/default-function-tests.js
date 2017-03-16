@@ -25,7 +25,7 @@ function test_defaults(test) {
     })
 
     test(test.engine + ': count len > 1', function (t) {
-        t.tableAssert([
+        t.table_assert([
             [ 's',             'v',   'expect' ],
             [ '',             '10',         0  ],
             [ '10',           '10',         1  ],
@@ -40,7 +40,7 @@ function test_defaults(test) {
     })
 
     test(test.engine + ': desc', (t) => {
-        t.tableAssert([
+        t.table_assert([
             [ 'label',        'input',   'output',    'exp'                 ],
             [ 'msg',          ['a'],     0,           "msg: ('a') -expect-> (0)" ],
             [ 'msg',          [1,2],     3,           "msg: (1,2) -expect-> (3)" ],
@@ -48,7 +48,7 @@ function test_defaults(test) {
     })
 
     test(test.engine + ': sum', (t) => {
-        t.tableAssert([
+        t.table_assert([
             [ 'array',                'prop_or_function', 'expect'],
             [ [],                                   null,     0],
             [ [0, 1, 2],                            null,     3],
@@ -64,17 +64,17 @@ function test_defaults(test) {
         ], t.sum)
     })
 
-    test(test.engine + ': tableAssert - auto-plan', (t) => {
+    test(test.engine + ': table_assert - auto-plan', (t) => {
         let tbl = t.table([
             ['a', 'b', 'exp'],
             [[], [1], [1]],
             [[1], [2, 3], [1, 2, 3]],
             [[1, 2], [], [1, 2]],
         ])
-        t.tableAssert(tbl, (a, b) => a.concat(b))
+        t.table_assert(tbl, (a, b) => a.concat(b))
     })
 
-    test(test.engine + ': tableAssert - pre-plan', (t) => {
+    test(test.engine + ': table_assert - pre-plan', (t) => {
         let tbl = t.table([
             ['a', 'b', 'exp'],
             [[], [1], [1]],
@@ -82,11 +82,11 @@ function test_defaults(test) {
             [[1, 2], [], [1, 2]],
         ])
         t.plan(tbl.length * 2)
-        t.tableAssert(tbl, (a, b) => a.concat(b))
-        t.tableAssert(tbl, (a, b) => a.concat(b))
+        t.table_assert(tbl, (a, b) => a.concat(b))
+        t.table_assert(tbl, (a, b) => a.concat(b))
     })
 
-    test(test.engine + ': tableAssert - plan per row', (t) => {
+    test(test.engine + ': table_assert - plan per row', (t) => {
         let tbl = t.table([
             ['a',    'b',    'exp'],
             [[],     [1],    [1]],
@@ -94,26 +94,26 @@ function test_defaults(test) {
             [[1, 2], [],     [1, 2]],
         ])
 
-        t.tableAssert(tbl, (a,b,exp) => {
+        t.table_assert(tbl, (a,b,exp) => {
             t.same(a.concat(b), exp)
             t.ok(exp)
         }, {assert: 'none', plan:2})    // 2 asserts per row
     })
 
-    test(test.engine + ': tableAssert - plan none', (t) => {
+    test(test.engine + ': table_assert - plan none', (t) => {
         let tbl = t.table([
             ['a',    'b',    'exp'],
             [[],     [1],    [1]],
             [[1],    [2, 3], [1, 2, 3]],
             [[1, 2], [],     [1, 2]],
         ])
-        t.tableAssert(tbl, (a, b) => a.concat(b), {plan:0})
-        t.tableAssert(tbl, (a, b) => a.concat(b), {plan:0})
+        t.table_assert(tbl, (a, b) => a.concat(b), {plan:0})
+        t.table_assert(tbl, (a, b) => a.concat(b), {plan:0})
         t.same(4, 4)
         t.end()
     })
 
-    test(test.engine + ': tableAssert - plan column', (t) => {
+    test(test.engine + ': table_assert - plan column', (t) => {
         let tbl = t.table([
             ['a',    'b',      'p',       'exp'      ],
             [[],     [1],       3,       [1]        ],
@@ -121,12 +121,12 @@ function test_defaults(test) {
             [[1, 2], [],        0,       [1, 2]     ],
         ])
         // test that column 'p' designates the plan total
-        t.tableAssert(tbl, (a, b, p) => {for(let i=0; i<p; i++){t.ok(true)}} , {assert:'none', plan:'p'})
+        t.table_assert(tbl, (a, b, p) => {for(let i=0; i<p; i++){t.ok(true)}} , {assert:'none', plan:'p'})
     })
 
     // Notice how this test can cover many inconvenient corner cases in one table.
     // I used tap test coverage to find cases and then add one-liners here to cover them.
-    test(test.engine + ': tableAssert - assert throws', (t) => {
+    test(test.engine + ': table_assert - assert throws', (t) => {
         let tbl = t.table([
             [ 'fn',           'input',                             'expect' ],
             [ 'count',        [4,     4],                          /type not handled/  ],
@@ -134,10 +134,10 @@ function test_defaults(test) {
             [ 'count',        ['abc', 4],                          /should be a string/  ],
             [ 'count',        ['abc', ''],                         /zero-length string/  ],
             [ 'count',        [new Uint8Array(2), 'aa'],           /long strings not supported/  ],
-            [ 'tableAssert',  [[['a'],[1]],,{plan:3}],             /plan has already been set/  ],  // tableAssert set default plan (1 per row)
+            [ 'table_assert',  [[['a'],[1]],,{plan:3}],             /plan has already been set/  ],  // table_assert set default plan (1 per row)
             [ 'imatch',       ['a%b%c',/X/,{no_match: 'throw'}],   /does not match/    ],
         ])
-        t.tableAssert(
+        t.table_assert(
             tbl,
             function(fn, input){ t[fn].apply(null, input) },
             {assert: 'throws'}
@@ -146,7 +146,7 @@ function test_defaults(test) {
 
 
     test(test.engine + ': str', (t) => {
-        t.tableAssert([
+        t.table_assert([
             [ 'v',                 'exp'                ],
             [ 1,                    '1'                  ],
             [ null,                 'null'               ],
@@ -158,7 +158,7 @@ function test_defaults(test) {
     })
 
     test(test.engine + ': padl', (t) => {
-        t.tableAssert([
+        t.table_assert([
             [ 'str',    'len',     'char',                  'exp' ],
             [ '',       0,         null,                    ''    ],
             [ '',       1,         null,                    ' '   ],
@@ -170,7 +170,7 @@ function test_defaults(test) {
     })
 
     test(test.engine + ': padl', (t) => {
-        t.tableAssert([
+        t.table_assert([
             [ 'str',    'len',     'char',                  'exp' ],
             [ '',       0,         null,                    ''    ],
             [ '',       1,         null,                    ' '   ],
@@ -185,7 +185,7 @@ function test_defaults(test) {
         class A {
             constructor() {this.x = 3}
         }
-        t.tableAssert([
+        t.table_assert([
             [ 'v',       'exp'       ],
             [ 1,         'number'    ],
             [ null,      'null'      ],
@@ -198,7 +198,7 @@ function test_defaults(test) {
     })
 
     test(test.engine + ': imatch', (t) => {
-        t.tableAssert([
+        t.table_assert([
             [ 's',     're',      'opt',                     'exp'                  ],
             [ '',      /x/,       null,                      [],                    ],
             [ 'b',     /x/,       null,                      ['b'],                 ],
@@ -239,7 +239,7 @@ function test_defaults(test) {
     })
 
     test(test.engine + ': utf8', (t) => {
-        t.tableAssert([
+        t.table_assert([
             [ 'v',                   'exp'                                  ],
             [ 0x61,                  [0x61]                                 ],
             [ 'abc\uD801\uDC00',     [0x61,0x62,0x63,0xF0,0x90,0x90,0x80]   ],
@@ -248,7 +248,7 @@ function test_defaults(test) {
     })
 
     test(test.engine + ': utf8_to_str', (t) => {
-        t.tableAssert([
+        t.table_assert([
             [ 'a',                                    'v',                    ],
             [ [0x61],                                 'a',                     ],
             [ [0x61,0x62,0x63,0xF0,0x90,0x90,0x80],  'abc\uD801\uDC00',        ],
