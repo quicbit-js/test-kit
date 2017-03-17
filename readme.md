@@ -10,7 +10,6 @@
 [npm-image]:       https://img.shields.io/npm/v/test-kit.svg
 [downloads-image]: https://img.shields.io/npm/dm/test-kit.svg
 [npm-url]:         https://npmjs.org/package/test-kit
-
 [proddep-image]:   https://www.bithound.io/github/quicbit-js/test-kit/badges/dependencies.svg
 [proddep-link]:    https://www.bithound.io/github/quicbit-js/test-kit/master/dependencies/npm
 [devdep-image]:    https://www.bithound.io/github/quicbit-js/test-kit/badges/devDependencies.svg
