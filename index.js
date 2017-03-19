@@ -129,6 +129,9 @@ function countws (s) {
   return c
 }
 
+function padl (s, l, c) { c = c || ' '; while (s.length < l) s = c + s; return s }
+function padr (s, l, c) { c = c || ' '; while (s.length < l) s = s + c; return s }
+
 function sum (a, prop_or_func) {
   if (prop_or_func == null) {
     return a.reduce(function (s, v) { return s + (v || 0) }, 0)
@@ -221,21 +224,21 @@ function plan (torig, tnew) {
   }
 }
 
-function countstr (s, v) {
+function countstr (src, v) {
   type(v) === 'string' || err('value should be a string: ' + type(v))
   v.length > 0 || err('cannot count zero-length string')
 
   var c = 0, i = 0
   if (v.length === 1) {
-    var len = s.length
-    for (i = 0; i < len; i++) { if (s[i] === v) c++ }
+    var len = src.length
+    for (i = 0; i < len; i++) { if (src[i] === v) c++ }
   } else {
-    for (i = s.indexOf(v); i !== -1; i = s.indexOf(v, i + 1)) { c++ }
+    for (i = src.indexOf(v); i !== -1; i = src.indexOf(v, i + 1)) { c++ }
   }
   return c
 }
 
-function countbuf (b, v) {
+function countbuf (src, v) {
   switch (type(v)) {
     case 'string':
       v.length === 1 || err('long strings not supported')
@@ -246,22 +249,23 @@ function countbuf (b, v) {
     default:
       throw Error('type not handled: ' + type(v))
   }
-  var c = 0, len = b.length
-  for (var i = 0; i < len; i++) { if (b[i] === v) c++ }
+  v === (v & 0xFF) || err('value for uint8array should be a byte (0-255)')
+  var c = 0, len = src.length
+  for (var i = 0; i < len; i++) { if (src[i] === v) c++ }
   return c
 }
 
-function count (s, v) {
-  switch (type(s)) {
+function count (src, v) {
+  switch (type(src)) {
     case 'uint8array':
-      return countbuf(s, v)
+      return countbuf(src, v)
     case 'string':
-      return countstr(s, v)
+      return countstr(src, v)
     case 'array':
-      for (var i = 0, c = 0; i < s.length; i++) { if (s[i] === v) c++ }
+      for (var i = 0, c = 0; i < src.length; i++) { if (src[i] === v) c++ }
       return c
     default:
-      throw Error('type not handled: ' + type(s))
+      throw Error('type not handled: ' + type(src))
   }
 }
 
@@ -367,23 +371,23 @@ function desc (lbl, inp, out) {
 // object so they may invoke new or prior-defined functions (delegate).
 
 var DEFAULT_FUNCTIONS = {
-  count: function () { return count },
-  desc: function () { return desc },
-  hector: function () { return hector },
-  imatch: function () { return imatch },
-  ireplace: function () { return ireplace },
-  lines: function () { return text_lines },
-  padl: function () { return function (s, l, c) { c = c || ' '; while (s.length < l) s = c + s; return s } },
-  padr: function () { return function (s, l, c) { c = c || ' '; while (s.length < l) s = s + c; return s } },
-  plan: function (torig, tnew) { return plan(torig, tnew) },
-  str: function () { return str },
-  sum: function () { return sum },
-  table: function () { return table },
-  tableAssert: function (torig, tnew) { return table_assert(torig, tnew) },    // backward-compatibility
+  count: function ()                   { return count },
+  desc: function ()                    { return desc },
+  hector: function ()                  { return hector },
+  imatch: function ()                  { return imatch },
+  ireplace: function ()                { return ireplace },
+  lines: function ()                   { return text_lines },
+  padl: function ()                    { return padl },
+  padr: function ()                    { return padr },
+  plan: function (torig, tnew)         { return plan(torig, tnew) },
+  str: function ()                     { return str },
+  sum: function ()                     { return sum },
+  table: function ()                   { return table },
+  tableAssert: function (torig, tnew)  { return table_assert(torig, tnew) },  // backward-compatibility
   table_assert: function (torig, tnew) { return table_assert(torig, tnew) },
-  type: function () { return type },
-  utf8: function () { return require('qb-utf8-ez').buffer },
-  utf8_to_str: function () { return require('qb-utf8-ez').string }
+  type: function ()                    { return type },
+  utf8: function ()                    { return require('qb-utf8-ez').buffer },
+  utf8_to_str: function ()             { return require('qb-utf8-ez').string }
 }
 
 function testfn (name_or_fn, custom_fns, opt) {
