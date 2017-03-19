@@ -2,40 +2,50 @@
 
 // these tests are run both with tape and tap
 
-function test_defaults(test) {
+function test_defaults (test) {
 
     test(test.engine + ': count len = 1', function (t) {
-        let tbl = t.table([
-            ['s', 'v', 'exp'],
-            ['', 'x', 0],
-            [' ', 'x', 0],
-            ['x', 'x', 1],
-            ['axa', 'x', 1],
-            ['xax', 'x', 2],
-        ])
-
-        t.plan(tbl.length * 4)
-        tbl.rows.forEach((r) => {
-            t.equal(t.count(r.s, r.v), r.exp, t.desc('count str', [r.s, r.v], r.exp))
-            t.equal(t.count(Buffer.from(r.s), r.v), r.exp, t.desc('count buf', [r.s, r.v], r.exp))
-            let vcode = r.v.charCodeAt(0)
-            t.equal(t.count(Buffer.from(r.s), vcode), r.exp, t.desc('count buf', [r.s, vcode], r.exp))
-            t.equal(t.count(r.s.split(''), r.v), r.exp, t.desc('count arr', [r.s, r.v], r.exp))
+        t.table_assert([
+            [ 'srctype',  'src',     'v',  'exp' ],
+            [ 'array',    '',        'x',   0 ],
+            [ 'array',    ' ',       'x',   0 ],
+            [ 'array',    'x',       'x',   1 ],
+            [ 'array',    'axa',     'x',   1 ],
+            [ 'array',    'xax',     'x',   2 ],
+            [ 'buffer',   '',        'x',   0 ],
+            [ 'buffer',   ' ',       'x',   0 ],
+            [ 'buffer',   'x',       'x',   1 ],
+            [ 'buffer',   'axa',     'x',   1 ],
+            [ 'buffer',   'xax',     'x',   2 ],
+            [ 'buffer',   'xax',     120,   2 ],
+            [ 'string',   '',        'x',   0 ],
+            [ 'string',   ' ',       'x',   0 ],
+            [ 'string',   'x',       'x',   1 ],
+            [ 'string',   'axa',     'x',   1 ],
+            [ 'string',   'xax',     'x',   2 ],
+        ], function (srctype, src, v) {
+            switch (srctype) {
+                case 'string': break
+                case 'array':  src = src.split('');    break
+                case 'buffer': src = Buffer.from(src); break  // create a uint8array
+                default: throw Error('unknown source type')
+            }
+            return t.count(src, v)
         })
     })
 
     test(test.engine + ': count len > 1', function (t) {
         t.table_assert([
             [ 's',             'v',   'expect' ],
-            [ '',             '10',         0  ],
-            [ '10',           '10',         1  ],
-            [ '101',          '10',         1  ],
-            [ '1010',         '10',         2  ],
-            [ '0100101001',    '0',         6  ],
-            [ '0100101001',    '1',         4  ],
-            [ '0100101001',   '10',         3  ],
-            [ '0100101001',  '100',         2  ],
-            [ '0100101001', '1000',         0  ],
+            [ '',             '10',          0 ],
+            [ '10',           '10',          1 ],
+            [ '101',          '10',          1 ],
+            [ '1010',         '10',          2 ],
+            [ '0100101001',    '0',          6 ],
+            [ '0100101001',    '1',          4 ],
+            [ '0100101001',   '10',          3 ],
+            [ '0100101001',  '100',          2 ],
+            [ '0100101001', '1000',          0 ],
         ], t.count)
     })
 
@@ -43,23 +53,23 @@ function test_defaults(test) {
         t.table_assert([
             [ 'label',        'input',   'output',    'exp'                 ],
             [ 'msg',          ['a'],     0,           "msg: ('a') -expect-> (0)" ],
-            [ 'msg',          [1,2],     3,           "msg: (1,2) -expect-> (3)" ],
+            [ 'msg',          [1,2],     3,           'msg: (1,2) -expect-> (3)' ],
         ], t.desc)
     })
 
     test(test.engine + ': sum', (t) => {
         t.table_assert([
             [ 'array',                'prop_or_function', 'expect'],
-            [ [],                                   null,     0],
-            [ [0, 1, 2],                            null,     3],
-            [ [, 1, , 3],                           null,     4],
-            [ [],                                  'foo',     0],
-            [ [{}],                                'foo',     0],
-            [ [{a: 1},{a: -2},{}],                   'a',    -1],
-            [ [{a: 1, b: 3},{a: -2},{}],             'a',    -1],
-            [ [],                        (v) => v.length,     0],
-            [ [''],                      (v) => v.length,     0],
-            [ ['abcd', 'ef', 'ghi'],     (v) => v.length,     9],
+            [ [],                                   null,     0 ],
+            [ [0, 1, 2],                            null,     3 ],
+            [ [, 1, undefined, 3],                  null,     4 ],
+            [ [],                                  'foo',     0 ],
+            [ [{}],                                'foo',     0 ],
+            [ [{a: 1},{a: -2},{}],                   'a',    -1 ],
+            [ [{a: 1, b: 3},{a: -2},{}],             'a',    -1 ],
+            [ [],                        (v) => v.length,     0 ],
+            [ [''],                      (v) => v.length,     0 ],
+            [ ['abcd', 'ef', 'ghi'],     (v) => v.length,     9 ],
 
         ], t.sum)
     })
@@ -129,13 +139,15 @@ function test_defaults(test) {
     test(test.engine + ': table_assert - assert throws', (t) => {
         let tbl = t.table([
             [ 'fn',           'input',                             'expect' ],
-            [ 'count',        [4,     4],                          /type not handled/  ],
-            [ 'count',        [new Uint8Array(2), false],          /type not handled/  ],
-            [ 'count',        ['abc', 4],                          /should be a string/  ],
-            [ 'count',        ['abc', ''],                         /zero-length string/  ],
-            [ 'count',        [new Uint8Array(2), 'aa'],           /long strings not supported/  ],
-            [ 'table_assert',  [[['a'],[1]],,{plan:3}],             /plan has already been set/  ],  // table_assert set default plan (1 per row)
-            [ 'imatch',       ['a%b%c',/X/,{no_match: 'throw'}],   /does not match/    ],
+            [ 'count',        [4,     4],                          /type not handled/ ],
+            [ 'count',        [new Uint8Array(2), false],          /type not handled/ ],
+            [ 'count',        ['abc', 4],                          /should be a string/ ],
+            [ 'count',        ['abc', ''],                         /zero-length string/ ],
+            [ 'count',        [new Uint8Array(2), 'aa'],           /long strings not supported/ ],
+            [ 'count',        [new Uint8Array(2), -1],             /should be a byte/ ],
+            [ 'count',        [new Uint8Array(2), 256],            /should be a byte/ ],
+            [ 'table_assert',  [[['a'],[1]],,{plan:3}],            /plan has already been set/ ],  // table_assert set default plan (1 per row)
+            [ 'imatch',       ['a%b%c',/X/,{no_match: 'throw'}],   /does not match/ ],
         ])
         t.table_assert(
             tbl,
@@ -144,10 +156,9 @@ function test_defaults(test) {
         )
     })
 
-
     test(test.engine + ': str', (t) => {
         t.table_assert([
-            [ 'v',                 'exp'                ],
+            [ 'v',                 'exp'                 ],
             [ 1,                    '1'                  ],
             [ null,                 'null'               ],
             [ [undefined],          '[null]'             ],
@@ -159,24 +170,24 @@ function test_defaults(test) {
 
     test(test.engine + ': padl', (t) => {
         t.table_assert([
-            [ 'str',    'len',     'char',                  'exp' ],
-            [ '',       0,         null,                    ''    ],
-            [ '',       1,         null,                    ' '   ],
-            [ 'a',      0,         null,                    'a'   ],
-            [ 'a',      1,         null,                    'a'   ],
-            [ 'a',      2,         null,                    ' a'  ],
-            [ 'a',      3,         '.',                    '..a'  ],
+            [ 'str',    'len',     'char',                'exp' ],
+            [ '',       0,         null,                     '' ],
+            [ '',       1,         null,                    ' ' ],
+            [ 'a',      0,         null,                    'a' ],
+            [ 'a',      1,         null,                    'a' ],
+            [ 'a',      2,         null,                   ' a' ],
+            [ 'a',      3,         '.',                   '..a' ],
         ], t.padl)
     })
 
     test(test.engine + ': padl', (t) => {
         t.table_assert([
             [ 'str',    'len',     'char',                  'exp' ],
-            [ '',       0,         null,                    ''    ],
-            [ '',       1,         null,                    ' '   ],
-            [ 'a',      0,         null,                    'a'   ],
-            [ 'a',      1,         null,                    'a'   ],
-            [ 'a',      2,         null,                    'a '  ],
+            [ '',       0,         null,                    '' ],
+            [ '',       1,         null,                    ' ' ],
+            [ 'a',      0,         null,                    'a' ],
+            [ 'a',      1,         null,                    'a' ],
+            [ 'a',      2,         null,                    'a ' ],
             [ 'a',      3,         '.',                     'a..' ],
         ], t.padr)
     })
@@ -228,7 +239,7 @@ function test_defaults(test) {
             [ 's',       're',       'fn_or_string',   'opt',               'exp'                 ],
             [ 'b',       /b/,        'q',               null,                'b'                  ],
             [ '',        /x/,        'q',               null,                ''                   ],
-            [ '',        /x/,        'q',              {no_match:'null'},    null                   ],
+            [ '',        /x/,        'q',              {no_match:'null'},    null                 ],
             [ 'b',       /x/,        'q',               null,                'q'                  ],
             [ 'abc',     /b/,        'q',               null,                'qbq'                ],
             [ 'a%b%c',   /%/,        'z',               null,                'z%z'                ],
@@ -340,7 +351,6 @@ function test_defaults(test) {
 
         t.end()
     })
-
 
     if(typeof test.onFinish === 'function') {
         test.onFinish(() => {
