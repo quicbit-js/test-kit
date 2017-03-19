@@ -25,7 +25,7 @@ An improved data-driven test experience using [tap](https://github.com/tapjs/nod
 or [tape](https://github.com/substack/tape).
 
 Enriches tape or tap (your choice) with productivity functions.  Most notable is probably
-tableAssert(), which can greatly decrease test clutter. 
+table_assert(), which can greatly decrease test clutter. 
 
 test-kit adds new functions to the callback argument 
 (named 't', below), where they are most accessible in your tests.  
@@ -105,9 +105,9 @@ This example comes directly from default-function-tests.js included with the pac
 Representing data in tabular form can make it easier to create comprehensive 
 coverage and highlight the test variations.
 
-## t.tableAssert()
+## t.table_assert()
 
-    t.tableAssert(table_or_data, fn, options)
+    t.table_assert(table_or_data, fn, options)
     
 If your test table adheres to the convention where the first columns of a table
 are inputs and the last column is expected output (should deep-equal output)
@@ -117,7 +117,7 @@ then you can write the above test even more concisely as:
     var test = require('test-kit).tape()
     
     test('count len > 1', function(t) {
-        let tbl = t.tableAssert([
+        let tbl = t.table_assert([
             [ 's',           'v',      'exp' ],
             [ '',            '10',      0  ],
             [ '10',          '10',      1  ],
@@ -158,17 +158,17 @@ But the output for using this traditional approach doesn't reveal detail:
     ok 4 should be equivalent
     ok 5 should be equivalent
     
-The detailed input and expected output that tableAssert gives speeds up trouble-shooting.
+The detailed input and expected output that table_assert gives speeds up trouble-shooting.
     
 ### Table assert options - more control
 
-A major benefit of t.tableAssert is the common need for its default behavior.  Many tests can
-be written using first several columns for input and last column to assert output - tableAssert()
+A major benefit of t.table_assert is the common need for its default behavior.  Many tests can
+be written using first several columns for input and last column to assert output - table_assert()
 will plan one assert per row, print full descriptions, and assert 'same' on each function
 result.  But what if we want another type of assert?  You can use the options parameter
 to use tables with different assert requirements:
 
-    t.tableAssert( table_or_data, fn, options )
+    t.table_assert( table_or_data, fn, options )
     
     options is an object with properties:
         plan:  (number) number of tests to plan() per row.  defaults to 1.  Set to zero to
@@ -186,7 +186,7 @@ to use tables with different assert requirements:
 this little table to cover some edge cases in test-table to quickly sweep out those corner cases
 and get 98% coverage:
 
-    test(test.engine + ': tableAssert - assert throws', (t) => {
+    test(test.engine + ': table_assert - assert throws', (t) => {
         let tbl = t.table([
             [ 'fn',           'input',                     'expect' ],
             [ t.count,        [4,     4],                  /type not handled/  ],
@@ -194,9 +194,9 @@ and get 98% coverage:
             [ t.count,        ['abc', 4],                  /should be a string/  ],
             [ t.count,        ['abc', ''],                 /zero-length string/  ],
             [ t.count,        [new Uint8Array(2), 'aa'],   /long strings not supported/  ],
-            [ t.tableAssert,  [[['a'],[1]],,{plan:3}],     /plan has already been set/  ],  // tableAssert set default plan (1 per row)
+            [ t.table_assert,  [[['a'],[1]],,{plan:3}],     /plan has already been set/  ],  // table_assert set default plan (1 per row)
         ])
-        t.tableAssert(
+        t.table_assert(
             tbl,
             function(fn, input){ fn.apply(null, input) },
             {assert: 'throws'}
@@ -206,13 +206,13 @@ and get 98% coverage:
                
 As with other table tests, the test output includes revealing detail for every test:
 
-    # tape: tableAssert - assert throws
+    # tape: table_assert - assert throws
     ok 69 : ('count',[4,4]) -expect-> ('/type not handled/')
     ok 70 : ('count',[{'0':0,'1':0},false]) -expect-> ('/type not handled/')
     ok 71 : ('count',['abc',4]) -expect-> ('/should be a string/')
     ok 72 : ('count',['abc','"]) -expect-> ('/zero-length string/')
     ok 73 : ('count',[{'0':0,'1':0},'aa']) -expect-> ('/long strings not supported/')
-    ok 74 : ('tableAssert',[[['a'],[1]],null,{'plan':3}]) -expect-> ('/plan has already been set/')
+    ok 74 : ('table_assert',[[['a'],[1]],null,{'plan':3}]) -expect-> ('/plan has already been set/')
 
 
 
@@ -276,13 +276,11 @@ The returned function has two properties:
 
 ## t.count()
 
-    t.count(buf, value)
+    t.count(source, value)
     
-Return the number of occurrences of value in a Uint8Array (or string or array).  Counting
-substrings in a string can handle different length substring values and employs a incrementing
-indexOf check for the count.  However, 
-uint8arrays currently only count single byte or single string (character code) occurences 
-and arrays only count values using '==='.
+Return the number of occurrences of value in a source string, array, or uint8array.  Counts
+any-length substrings in a string, but only single bytes in a uint8array.  Uses
+String.indexOf for string checking and equivalence (===) for arrays.
     
 ## t.sum()
 
@@ -427,7 +425,7 @@ Return the value type using Object.prototype.toString.  The implementation from 
     
 For the cases below, type(v) yields the exp(ected) outputs 
 
-        t.tableAssert([
+        t.table_assert([
             [ 'v',       'exp'       ],
             [ 1,         'number'    ],
             [ null,      'null'      ],
@@ -469,17 +467,24 @@ at the index.js file:
     // Creation functions are passed the original test object and the new test
     // object so they may invoke new or prior-defined functions (delegate).
     
-    let DEFAULT_FUNCTIONS = {
-        count:       () => count,
-        desc:        () => desc,
-        hector:      () => hector,
-        lines:       () => text_lines,
-        str:         () => str,
-        sum:         () => sum,
-        table:       () => table,
-        tableAssert: (torig, tnew) => tableAssert(torig, tnew),
-        type:        () => type,
-        plan:        (torig, tnew) => plan(torig, tnew)
+    var DEFAULT_FUNCTIONS = {
+      count: function ()                   { return count },
+      desc: function ()                    { return desc },
+      hector: function ()                  { return hector },
+      imatch: function ()                  { return imatch },
+      ireplace: function ()                { return ireplace },
+      lines: function ()                   { return text_lines },
+      padl: function ()                    { return padl },
+      padr: function ()                    { return padr },
+      plan: function (torig, tnew)         { return plan(torig, tnew) },
+      str: function ()                     { return str },
+      sum: function ()                     { return sum },
+      table: function ()                   { return table },
+      tableAssert: function (torig, tnew)  { return table_assert(torig, tnew) },  // backward-compatibility
+      table_assert: function (torig, tnew) { return table_assert(torig, tnew) },
+      type: function ()                    { return type },
+      utf8: function ()                    { return require('qb-utf8-ez').buffer },
+      utf8_to_str: function ()             { return require('qb-utf8-ez').string }
     }
 
 Each entry in the map returns a test function.  Returned functions may use the original and/or new test
