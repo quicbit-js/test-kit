@@ -110,7 +110,22 @@ function test_defaults (test) {
         }, {assert: 'none', plan:2})    // 2 asserts per row
     })
 
-    test(test.engine + ': table_assert - plan none', (t) => {
+    test(test.engine + ': table_assert - assert none, default to no plan', (t) => {
+        let tbl = t.table([
+            ['a',    'b',    'exp'],
+            [[],     [1],    [1]],
+            [[1],    [2, 3], [1, 2, 3]],
+            [[1, 2], [],     [1, 2]],
+        ])
+
+        t.table_assert(tbl, (a,b,exp) => {
+            t.same(a.concat(b), exp)
+            t.ok(exp)
+        }, {assert: 'none'})
+        t.end()
+    })
+
+    test(test.engine + ': table_assert - plan zero', (t) => {
         let tbl = t.table([
             ['a',    'b',    'exp'],
             [[],     [1],    [1]],

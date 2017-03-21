@@ -146,35 +146,14 @@ function table (data) {
   return require('test-table').create(data)
 }
 
-// 'dataOrTable' can be a 2D array with a header row or a Table object
-//
-//
-// fn is the assertion function applied to each row
-//
-// opt settings control how the assertion function is applied and how tests are planned
-//    {
-//        assert:  'same',      // (default) all columns but the last are inputs to fn, and the last column
-//                              //    will be asserted using t.same().  IOW, for each row, assert.same(fn(first-n-values), last-value)
-//                 'throws',    // all columns but the last are inputs to fn, and the last column is
-//                              //    a string or regular expression that should match an expected error
-//                              //    using t.throws( function() { {fn(first-n-values)}, last-value)
-//                 'none',      // Execute fn(all-column-values), without asserting fn output (fn should do asserts itself)
-//                 anything else.... works like same but using whatever assert function is applied to assert the last column value.
-//
-//        plan: n-or-string  // Set t.plan() prior to running table tests, iff plan() was not
-//                           // already called.  That is, t.plan(3) prior to tableAssert(tbl, fn) will simply plan(3), but
-//                           // tableAssert(tbl, fn) will do plan(tbl.length), the default setting.
-//                           //
-//                           // (integer) (default is 1) plan this number of tests per row.  IOW, plan(tbl.length * n)
-//                           // (string) if set to a column name, use that column as the expected plan count for each row (variable asserts)
-//                           // If set to zero, then don't call plan during tableAssert().
-//    }
 function table_assert (torig, tnew) {
   return function (dataOrTable, fn, opt) {
     var tbl = tnew.table(dataOrTable)
     opt = assign({}, opt)
+    var assert = opt.assert || 'same'
+
     if (opt.plan == null) {
-      opt.plan = tnew.planned_tests ? 0 : 1
+      opt.plan = (!tnew.planned_tests && assert !== 'none') ? 1 : 0
     } else {
       opt.plan === 0 || !tnew.planned_tests || err('plan has already been set: ' + tnew.planned_tests)
     }
@@ -189,7 +168,6 @@ function table_assert (torig, tnew) {
       tnew.plan(plan_total)   // sets planned_tests, which cannot be changed
     }
 
-    var assert = opt.assert || 'same'
     tbl.rows.forEach(function (r) {
       var vals = r._vals
       var exp_val

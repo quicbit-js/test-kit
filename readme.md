@@ -171,8 +171,8 @@ to use tables with different assert requirements:
     t.table_assert( table_or_data, fn, options )
     
     options is an object with properties:
-        plan:  (number) number of tests to plan() per row.  defaults to 1.  Set to zero to
-                not do any plans and use t.end() instead.
+        plan:  (number) number of tests to plan() per row.  defaults to 1 (if assert !== 'none').  
+                        Set plan to zero to do no plan() and use t.end() instead.
                (string) a string plan will use the given column name and total up values in
                a given column to plan the test.
         assert: (string) - gives the test assert method to apply for every row.  'same' is the
@@ -180,7 +180,7 @@ to use tables with different assert requirements:
                 'throws' - will assert that the fn applied to the first columns will
                           throw an error that matches the expression in the last table column.
                 'none'   - will do no assertions and leave that up you (your function).
-                           The function will use all columns as input.
+                           The function will use all columns as input.  No default plan is set.
                
 **{assert: 'throws'}** is a great way to cover edge cases in your tests.  For example, sI used
 this little table to cover some edge cases in test-table to quickly sweep out those corner cases
