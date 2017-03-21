@@ -105,9 +105,10 @@ This example comes directly from default-function-tests.js included with the pac
 Representing data in tabular form can make it easier to create comprehensive 
 coverage and highlight the test variations.
 
-## t.table_assert()
+## t.table_assert() and t.tableAssert()
 
     t.table_assert(table_or_data, fn, options)
+    t.tableAssert(table_or_data, fn, options)   // same function - if you prefer pascalCase
     
 If your test table adheres to the convention where the first columns of a table
 are inputs and the last column is expected output (should deep-equal output)
