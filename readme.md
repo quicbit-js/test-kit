@@ -17,15 +17,12 @@
 [code-image]:      https://www.bithound.io/github/quicbit-js/test-kit/badges/code.svg
 [code-link]:       https://www.bithound.io/github/quicbit-js/test-kit
 
-A very simple table for data-driven testing.  test-table is provided through
-[quicbit-js/test-kit](http://github.com/quicbit-js/test-kit), but can be 
-used independently as well.
+[tap-link]:        https://github.com/tapjs/node-tap
+[tape-link]:       https://github.com/substack/tape 
+An improved data-driven test experience using [tap][tap-link] or [tape][tape-link].
 
-An improved data-driven test experience using [tap](https://github.com/tapjs/node-tap) 
-or [tape](https://github.com/substack/tape).
-
-Enriches tape or tap (your choice) with productivity functions.  Most notable is probably
-table_assert(), which can greatly decrease test clutter. 
+Enriches tape or tap (your choice) with productivity functions.  Most notable is
+tableAssert(), which shows coverage cases more clearly and improves test output as well.
 
 test-kit adds new functions to the callback argument 
 (named 't', below), where they are most accessible in your tests.  
@@ -110,57 +107,82 @@ coverage and highlight the test variations.
     t.table_assert(table_or_data, fn, options)
     t.tableAssert(table_or_data, fn, options)   // same function - if you prefer pascalCase
     
-If your test table adheres to the convention where the first columns of a table
-are inputs and the last column is expected output (should deep-equal output)
-of a single function test, 
-then you can write the above test even more concisely as:
+Instead of: 
 
-    var test = require('test-kit).tape()
+    var test = require('tape')
+    var illegal = require('qb-utf8-illegal-bytes')
     
-    test('count len > 1', function(t) {
-        let tbl = t.table_assert([
-            [ 's',           'v',      'exp' ],
-            [ '',            '10',      0  ],
-            [ '10',          '10',      1  ],
-            [ '101',         '10',      1  ],
-            [ '1010',        '10',      2  ],
-            [ '0100101001',  '10',      3  ],
-        ], t.count)
+    test('illegal', function (t) {
+      t.plan(7)
+      
+      t.deepEqual(illegal([167, 168, 169]),             [[0,3]] )
+      t.deepEqual(illegal([167, 168, 169], 1),          [[1,3]] )
+      t.deepEqual(illegal([167, 168, 169], 2),          [[2,3]] )
+      t.deepEqual(illegal([167, 168, 169], 3),          [] )
+      t.deepEqual(illegal([167, 168, 169], null, 2),    [[0,2]] )
+      t.deepEqual(illegal([167, 97, 168, 98, 169]),     [[0,1], [2,3], [4,5]] )
+      t.deepEqual(illegal([97, 98, 0x63, 167, 97, 98]), [[3,4]] )
     })
-
-Which outputs:
-
-    # tape: count len > 1
-    ok 1 : ('",'10') -expect-> (0)
-    ok 2 : ('10','10') -expect-> (1)
-    ok 3 : ('101','10') -expect-> (1)
-    ok 4 : ('1010','10') -expect-> (2)
-    ok 5 : ('0100101001','10') -expect-> (3)
     
+Try this (the first three columns are 
+used as inputs to illegal(), the 'expect' column is asserted to be deepEqual to the result).
 
-This is similar to asserting imperitively:
-
-    test('count len > 1', function(t) {
-        t.plan(5);
-        
-        t.same( t.count( '',           '10'), 0);
-        t.same( t.count( '10',         '10'), 1);
-        t.same( t.count( '101',        '10'), 1);
-        t.same( t.count( '1010',       '10'), 2);
-        t.same( t.count( '0100101001', '10'), 3);
-    }
+    var test = require('test-kit').tape()
+    var illegal = require('qb-utf8-illegal-bytes')
     
-But the output for using this traditional approach doesn't reveal detail:
+    test('illegal', function (t) {
+      t.tableAssert([
+        [ 'src',                         'off',  'lim',      'expect'                ],
+        [ [ 167, 168, 169 ],              null,   null,      [ [0,3] ]               ],
+        [ [ 167, 168, 169 ],              1,      null,      [ [1,3] ]               ],
+        [ [ 167, 168, 169 ],              2,      null,      [ [2,3] ]               ],
+        [ [ 167, 168, 169 ],              3,      null,      []                      ],
+        [ [ 167, 168, 169 ],              null,   2,         [ [0,1] ]               ],
+        [ [ 167, 97, 168, 98, 169 ],      null,   null,      [ [0,1], [2,3], [4,5] ] ],
+        [ [ 97, 98, 0x63, 167, 97, 98 ],  null,   null,      [ [3,4] ]               ],
+      ], illegal)
+    })
+    
+I find spotting and updating special test cases works better when inputs and expected output
+are laid out in table form.
+    
+Using tableAssert() **also enriches the test output** so instead of:
 
-    # tape: count len > 1
+    # illegal
     ok 1 should be equivalent
     ok 2 should be equivalent
     ok 3 should be equivalent
     ok 4 should be equivalent
-    ok 5 should be equivalent
-    
-The detailed input and expected output that table_assert gives speeds up trouble-shooting.
-    
+    not ok 5 should be equivalent
+      ---
+        operator: deepEqual
+        expected: [ [ 0, 1 ] ]
+        actual:   [ [ 0, 2 ] ]
+        at: Test.<anonymous> (/Users/dad/ghub/qb-utf8-illegal-bytes/t.js:10:12)
+      ...
+    ok 6 should be equivalent
+    ok 7 should be equivalent
+
+We get:
+
+    # illegal
+    ok 1 : ([167,168,169],null,null) -expect-> ([[0,3]])
+    ok 2 : ([167,168,169],1,null) -expect-> ([[1,3]])
+    ok 3 : ([167,168,169],2,null) -expect-> ([[2,3]])
+    ok 4 : ([167,168,169],3,null) -expect-> ([])
+    not ok 5 : ([167,168,169],null,2) -expect-> ([[0,1]])
+      ---
+        operator: deepEqual
+        expected: [ [ 0, 1 ] ]
+        actual:   [ [ 0, 2 ] ]
+        at: Test.tableAssert (/Users/dad/ghub/qb-utf8-illegal-bytes/node_modules/test-kit/index.js:171:14)
+      ...
+    ok 6 : ([167,97,168,98,169],null,null) -expect-> ([[0,1],[2,3],[4,5]])
+    ok 7 : ([97,98,99,167,97,98],null,null) -expect-> ([[3,4]])
+
+... which has been a big time-saver for me personally.  These little tools have helped raise the practice of testing
+from a tedious chore to something almost fun.   *almost*.
+
 ### Table assert options - more control
 
 A major benefit of t.table_assert is the common need for its default behavior.  Many tests can
