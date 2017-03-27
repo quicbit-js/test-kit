@@ -378,7 +378,8 @@ function testfn (name_or_fn, custom_fns, opt) {
     try {
       test_orig = require(name_or_fn).test
     } catch(e) {
-      err('could not load ' + name_or_fn + ': ' + e)
+      var suggest = (typeof custom_fns === 'function') ? ' (It looks like the call to tape or tap was left out as in "require(\'test-kit\').tape()")' : ''
+      err('could not load ' + name_or_fn + suggest + ': ' + e)
     }
   }
   typeof test_orig === 'function' || err(name_or_fn + ' is not a function')
