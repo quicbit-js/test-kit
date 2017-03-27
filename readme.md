@@ -2,7 +2,7 @@
 
 [![npm][npm-image]][npm-url]
 [![downloads][downloads-image]][npm-url]
-[![bitHound Dependencies][proddep-image]][proddep-link]
+[![dependencies][proddep-image]][proddep-link]
 [![dev dependencies][devdep-image]][devdep-link]
 [![code analysis][code-image]][code-link]
 
