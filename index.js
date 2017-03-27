@@ -375,8 +375,13 @@ function testfn (name_or_fn, custom_fns, opt) {
 
   var test_orig = name_or_fn
   if (typeof name_or_fn === 'string') {
-    test_orig = require(name_or_fn).test
+    try {
+      test_orig = require(name_or_fn).test
+    } catch(e) {
+      err('could not load ' + name_or_fn + ': ' + e)
+    }
   }
+  typeof test_orig === 'function' || err(name_or_fn + ' is not a function')
   if (test_orig.only) {
     ret = function () { return test_orig.apply(null, enrich_test_arguments(arguments, enrich_fns)) }
     ret.only = function () { return test_orig.only.apply(null, enrich_test_arguments(arguments, enrich_fns)) }
