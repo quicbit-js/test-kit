@@ -331,20 +331,20 @@ function test_defaults (test) {
     test(test.engine + ': hector', (t) => {
         // args for hector to collect as repeated function call arguments
         let args = [
-            [null, 5, 'a'],
-            [undefined, 7, 'b'],
-            [{a: [2]}, 9, ''],
-            [],
-            [{}, 11, 'end'],
+            [ null,      5,  'a' ],
+            [ undefined, 7,  'b' ],
+            [ {a: [2]},  9,  '' ],
+            [  ],
+            [ {},        11, 'end' ],
         ]
         let names = ['a0', 'a1', 'a2']
 
         let expected = t.table([
-            ['name', 'i', 'exp'],
-            ['a0', 0, [null, undefined, {a: [2]}, undefined, {}]],
-            ['a1', 1, [5, 7, 9, undefined, 11]],
-            ['a2', 2, ['a', 'b', '', undefined, 'end']],
-            ['foo', 3, [ undefined, undefined, undefined, undefined, undefined ]],
+            [ 'name', 'i', 'exp' ],
+            [ 'a0',   0,   [ null,      undefined, {a: [2]},  undefined, {} ] ],
+            [ 'a1',   1,   [ 5,         7,         9,         undefined, 11 ] ],
+            [ 'a2',   2,   [ 'a',       'b',       '',        undefined, 'end' ] ],
+            [ 'foo',  3,   [ undefined, undefined, undefined, undefined, undefined ] ],
         ])
 
         // hector with names
