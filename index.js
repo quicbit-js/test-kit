@@ -1,4 +1,4 @@
-'use strict'
+var assign = require('qb-assign')
 
 // collects test argument and executes them later (on timeout) according to whether 'only'
 // was called or not.
@@ -278,18 +278,6 @@ function imatch (s, re, opt) {
 
   ret.push([off, s.length - off])
   return prep_result(ret)
-}
-
-// a simple and limited version of Object.assign for options - copies normal properties
-function assign () {
-  var dst = Object(arguments[0])
-  for (var i = 1; i < arguments.length; i++) {
-    var src = arguments[i]
-    if (src != null) {
-      Object.keys(src).forEach(function (k) { dst[k] = src[k] })
-    }
-  }
-  return dst
 }
 
 function ireplace (s, re, fn_or_string, opt) {
