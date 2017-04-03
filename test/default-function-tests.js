@@ -180,6 +180,8 @@ function test_defaults (test) {
             [ [1, 2],               '[1,2]'              ],
             [ {a: 1, b: [null]},    "{'a':1,'b':[null]}" ],
             [ undefined,            'null'               ],
+            [ [function () {}],     '[\'function ()\']'  ],
+            [ [function foo () {}], '[\'foo ()\']'       ],
         ], t.str)
     })
 

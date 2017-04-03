@@ -73,7 +73,14 @@ function enrich_t (fn, enrich_fns) {
 // str() converts undefined to null and doesn't handle cycles, so has room for improvement.
 function str (v) {
   if (v === undefined) return 'null'
-  return JSON.stringify(v).replace(/([^\\])"/g, "$1'").replace(/\\"/g, '"')
+  return JSON.stringify(v, replacer).replace(/([^\\])"/g, "$1'").replace(/\\"/g, '"')
+}
+
+function replacer (ignore, v) {
+  if(typeof v === 'function') {
+    v = (v.name && v.name + ' ()') || 'function ()'
+  }
+  return v
 }
 
 function parens (args) {
