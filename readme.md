@@ -204,6 +204,8 @@ to use tables with different assert requirements:
                           throw an error that matches the expression in the last table column.
                 'none'   - will do no assertions and leave that up you (your function).
                            The function will use all columns as input.  No default plan is set.
+        trunc: (boolean) - if set, the arguments passed to the callback will first have t.trunc() applied (removing
+                             null and undefined values from the end)
                
 **{assert: 'throws'}** is a great way to cover edge cases in your tests.  For example, sI used
 this little table to cover some edge cases in test-table to quickly sweep out those corner cases
