@@ -339,7 +339,7 @@ This can be helpful when using table_assert testing variable-arg functions:
         return t.padl.apply(null, t.trunc( arguments ) )
     })
     
-t.trunc() is also available as a [table_assert](#t.table_assert_and_t.tableAssert) option.
+t.trunc() is also available as a [table_assert](#ttable_assert-and-ttableassert) option.
 
 ## t.imatch()
 
