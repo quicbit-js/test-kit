@@ -149,6 +149,64 @@ function test_defaults (test) {
         t.table_assert(tbl, (a, b, p) => {for(let i=0; i<p; i++){t.ok(true)}} , {assert:'none', plan:'p'})
     })
 
+    test(test.engine + ': table_assert - trunc', (t) => {
+        t.table_assert(
+            [
+                [ 'a',       'b',   'c',    'exp' ],
+                [ 2,         1,     0,      [2,1,0] ],
+                [ 2,         1,     null,   [2,1] ],
+                [ 1,         null,  null,   [1] ],
+                [ undefined, null,  null,   [] ],
+            ],
+            function () { return Array.prototype.slice.call(arguments) },
+            {trunc: true}
+        )
+    })
+
+    test(test.engine + ': table_assert - trunc no assert', (t) => {
+        var exp = [
+            [2,1,0],
+            [2,1],
+            [1],
+            [],
+        ]
+
+        var i = 0
+        t.table_assert(
+            [
+                [ 'a',    'b',     'c' ],
+                [ 2,      1,       0 ],
+                [ 2,      1,       null ],
+                [ 1,      null,    null ],
+                [ undefined, null, null ],
+            ],
+            function () {
+                var args = Array.prototype.slice.call(arguments)
+                t.same(args, exp[i], t.desc('trunc', [args], exp[i]))
+                i++
+            },
+            {assert: 'none', trunc: true}
+        )
+        t.end()
+    })
+
+    test(test.engine + ': table_assert - trunc throws', (t) => {
+        t.table_assert(
+            [
+                [ 'a',    'b',     'c',    'exp' ],
+                [ 2,      1,       0,      /got:2,1,0:/ ],
+                [ 2,      1,       null,   /got:2,1:/ ],
+                [ 1,      null,    null,   /got:1:/ ],
+                [ undefined, null, null,   /got::/ ],
+            ],
+            function () {
+                var args = Array.prototype.slice.call(arguments)
+                throw Error('got:' + args.join(',') + ':')
+            },
+            {assert: 'throws', trunc: true}
+        )
+    })
+
     // Notice how this test can cover many inconvenient corner cases in one table.
     // I used tap test coverage to find cases and then add one-liners here to cover them.
     test(test.engine + ': table_assert - assert throws', (t) => {
@@ -169,6 +227,18 @@ function test_defaults (test) {
             function(fn, input){ t[fn].apply(null, input) },
             {assert: 'throws'}
         )
+    })
+
+    test(test.engine + ': trunc', (t) => {
+        t.table_assert([
+            [ 'args',                   'exp' ],
+            [ [],                       [] ],
+            [ [1,2,3],                  [1,2,3] ],
+            [ [null, 1],                [null, 1] ],
+            [ [1, undefined],           [1] ],
+            [ [0, null, undefined],     [0] ],
+            [ [null, undefined, null],  [] ],
+        ], t.trunc)
     })
 
     test(test.engine + ': str', (t) => {

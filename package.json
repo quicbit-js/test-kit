@@ -1,6 +1,6 @@
 {
   "name": "test-kit",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "An improved data-driven test experience using tap or tape",
   "homepage": "https://github.com/quicbit-js/test-kit",
   "url": "https://github.com/quicbit-js/test-kit/issues",
@@ -16,7 +16,8 @@
     "tape": "^4.6.3"
   },
   "scripts": {
-    "test": "tap --coverage-report=html test/test-*.js"
+    "test": "tap --100 test/test-*.js",
+    "cov": "tap --coverage-report=html test/test-*.js"
   },
   "files": [
     "index.js"

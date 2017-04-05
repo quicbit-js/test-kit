@@ -314,6 +314,33 @@ return the sum of the results of the function applied to each array value.  If s
 argument is a string or number, return the sum of that property of all items in the 
 array.
 
+## t.trunc()
+
+    t.trunc(a)
+    
+Given an array or array-like object, return a new array with trailing null and undefined values removed.  
+
+    t.trunc( [1, 2, 3, undefined] )
+    > [1, 2, 3]
+    t.trunc( [0, null, null] )
+    > [0]
+    t.trunc( ['a', 2] )
+    >['a', 2]
+
+This can be helpful when using table_assert testing variable-arg functions:
+
+    // test padl() with and without the 3rd character argument:
+    
+    t.table_assert([
+        [ 's',  'len',  'ch',  'expect' ],
+        [ 'a',  '3'     '.',   'a..'    ],
+        [ 'a',  '3',   null,   'a  '    ],
+    ], function () {
+        return t.padl.apply(null, t.trunc( arguments ) )
+    })
+    
+t.trunc() is also available as a [table_assert](#t.table_assert_and_t.tableAssert) option.
+
 ## t.imatch()
 
     imatch(s, regex, options)

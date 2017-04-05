@@ -139,6 +139,13 @@ function countws (s) {
 function padl (s, l, c) { c = c || ' '; while (s.length < l) s = c + s; return s }
 function padr (s, l, c) { c = c || ' '; while (s.length < l) s = s + c; return s }
 
+function trunc (a) {
+  var i = a.length-1;
+  while (a[i] == null && i >= 0)
+    i--;
+  return Array.prototype.slice.call(a, 0, i+1)
+}
+
 function sum (a, prop_or_func) {
   if (prop_or_func == null) {
     return a.reduce(function (s, v) { return s + (v || 0) }, 0)
@@ -179,14 +186,17 @@ function table_assert (torig, tnew) {
       var vals = r._vals
       var exp_val
       if (assert === 'none') {
+        if (opt.trunc) { vals = tnew.trunc(vals) }
         fn.apply(null, vals)
       } else if (assert === 'throws') {
         vals = vals.slice()
         exp_val = vals.pop()
+        if (opt.trunc) { vals = tnew.trunc(vals) }
         tnew.throws(function () { fn.apply(null, vals) }, exp_val, tnew.desc('', vals, exp_val.toString()))
       } else {
         vals = vals.slice()
         exp_val = vals.pop()
+        if (opt.trunc) { vals = tnew.trunc(vals) }
         tnew[assert](fn.apply(null, vals), exp_val, tnew.desc('', vals, exp_val))
       }
     })
@@ -358,6 +368,7 @@ var DEFAULT_FUNCTIONS = {
   table: function ()                   { return table },
   tableAssert: function (torig, tnew)  { return table_assert(torig, tnew) },  // backward-compatibility
   table_assert: function (torig, tnew) { return table_assert(torig, tnew) },
+  trunc: function ()                   { return trunc },
   type: function ()                    { return type },
   utf8: function ()                    { return require('qb-utf8-ez').buffer },
   utf8_to_str: function ()             { return require('qb-utf8-ez').string }
