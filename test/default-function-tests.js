@@ -219,7 +219,8 @@ function test_defaults (test) {
             [ 'count',        [new Uint8Array(2), 'aa'],           /long strings not supported/ ],
             [ 'count',        [new Uint8Array(2), -1],             /should be a byte/ ],
             [ 'count',        [new Uint8Array(2), 256],            /should be a byte/ ],
-            [ 'table_assert',  [[['a'],[1]],,{plan:3}],            /plan has already been set/ ],  // table_assert set default plan (1 per row)
+            [ 'table_assert',  [[['a'],[1]],null,{plan:3}],        /invalid function argument/ ],
+            [ 'table_assert',  [[['a'],[1]],t.count,{plan:3}],     /plan has already been set/ ],  // table_assert set default plan (1 per row)
             [ 'imatch',       ['a%b%c',/X/,{no_match: 'throw'}],   /does not match/ ],
         ])
         t.table_assert(

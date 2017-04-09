@@ -162,9 +162,11 @@ function table (data) {
 
 function table_assert (torig, tnew) {
   return function (dataOrTable, fn, opt) {
-    var tbl = tnew.table(dataOrTable)
+    fn && typeof fn === 'function' || err('invalid function argument: ' + fn)
     opt = assign({}, opt)
     var assert = opt.assert || 'same'
+
+    var tbl = tnew.table(dataOrTable)
 
     if (opt.plan == null) {
       opt.plan = (!tnew.planned_tests && assert !== 'none') ? 1 : 0
