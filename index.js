@@ -192,16 +192,15 @@ function table_assert (torig, tnew) {
       if (assert === 'none') {
         if (opt.trunc) { vals = tnew.trunc(vals) }
         fn.apply(null, vals)
-      } else if (assert === 'throws') {
-        vals = vals.slice()
-        exp_val = vals.pop()
-        if (opt.trunc) { vals = tnew.trunc(vals) }
-        tnew.throws(function () { fn.apply(null, vals) }, exp_val, tnew.desc('', vals, exp_val.toString()))
       } else {
         vals = vals.slice()
         exp_val = vals.pop()
         if (opt.trunc) { vals = tnew.trunc(vals) }
-        tnew[assert](fn.apply(null, vals), exp_val, tnew.desc('', vals, exp_val))
+        if (assert === 'throws') {
+          tnew.throws(function () { fn.apply(null, vals) }, exp_val, tnew.desc('', vals, exp_val.toString()))
+        } else {
+          tnew[assert](fn.apply(null, vals), exp_val, tnew.desc('', vals, exp_val))
+        }
       }
     })
   }
