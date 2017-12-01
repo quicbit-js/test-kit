@@ -240,6 +240,19 @@ As with other table tests, the test output includes revealing detail for every t
     ok 74 : ('table_assert',[[['a'],[1]],null,{'plan':3}]) -expect-> ('/plan has already been set/')
 
 
+## t.tkprop()  "get/set property"
+
+get or set a test-kit property on the running test.  Currently there is only one property "print_mode",
+which is truthy.
+
+    t.tkprop('print_mode')              // one argument queries the property
+    > null
+    
+    t.tkprop('print_mode', true)        // set print mode to enabled
+    t.tkprop('print_mode')          
+    > true
+    
+See test.print() for more info - (similar to the only() function)
 
 ## t.desc()   "describe"
 
@@ -490,6 +503,93 @@ For the cases below, type(v) yields the exp(ected) outputs
 
 (the table was copied from [test/default-function-tests.js](https://github.com/quicbit-js/test-kit/blob/master/test/default-function-tests.js))
     
+
+## test.print()
+
+Using lots of rich table asserts?  That's great.  Tired of changing output and having to update your
+table output all by hand?  Yeah.  Me too.
+
+This was the test that pushed me over the edge.  It's a JSON parse module called
+[qb-json-tokv](https://github.com/quicbit-js/qb-json-tokv) 
+that saves detailed
+information for incremental parsing and recovery:
+
+      [ 'input'              , 'exp'                                               ],
+      [ '"abc", '            , [ 'B@0,S5@0,E@7', '0.7/-/B_V/null' ]                ],
+      [ '['                  , [ 'B@0,[@0,E@1', '0.1/[/BFV/null' ]                 ],
+      [ '[ 83 '              , [ '[@0,N2@2,E@5', '0.5/[/A_V/null' ]                ],
+      [ '[ 83 ,'             , [ '[@0,N2@2,E@6', '0.6/[/B_V/null' ]                ],
+      [ '[ 83 , "a"'         , [ 'N2@2,S3@7,E@10', '0.10/[/A_V/null' ]             ],
+      [ '[ 83 , "a",'        , [ 'N2@2,S3@7,E@11', '0.11/[/B_V/null' ]             ],
+      [ '[ 83 , "a", 2'      , [ 'N2@2,S3@7,E@12', '0.13/[/B_V/2' ]                ],
+      [ '{'                  , [ 'B@0,{@0,E@1', '0.1/{/BFK/null' ]                 ],
+      [ '{ "a"'              , [ 'B@0,{@0,K3@2:E@5', '0.5/{/A_K/null' ]            ],
+      [ '{ "a":'             , [ 'B@0,{@0,K3@2:E@6', '0.6/{/B_V/null' ]            ],
+      [ '{ "a": 9'           , [ 'B@0,{@0,K3@2:E@7', '0.8/{/B_V/9' ]               ],
+      [ '{ "a": 93, '        , [ '{@0,K3@2:N2@7,E@11', '0.11/{/B_K/null' ]         ],
+      [ '{ "a": 93, "b'      , [ '{@0,K3@2:N2@7,E@11', '0.13/{/B_K/"b' ]           ],
+      [ '{ "a": 93, "b"'     , [ '{@0,K3@2:N2@7,K3@11:E@14', '0.14/{/A_K/null' ]   ],
+      [ '{ "a": 93, "b":'    , [ '{@0,K3@2:N2@7,K3@11:E@15', '0.15/{/B_V/null' ]   ],
+      [ '{ "a": 93, "b": ['  , [ 'K3@2:N2@7,K3@11:[@16,E@17', '0.17/{[/BFV/null' ] ],
+      [ '{ "a": 93, "b": []' , [ 'K3@11:[@16,]@17,E@18', '0.18/{/A_V/null' ]       ],
+      [ '{ "a": 93, "b": [] ', [ 'K3@11:[@16,]@17,E@19', '0.19/{/A_V/null' ]       ],
+      ...
+
+Lot's of dense output for parsing.  With every enrichment of information, I had to edit multiple 
+lines of expected output.  Soon had enough of that - and instead added the new print() function.
+It works like test.only(), in that you add it to the test you are working on and it will run
+only the assertions in that test.  If there is a table_assert, it will pretty-print it out
+in javascript so you can verify and paste the whole table in if you like to save yourself from
+of tedious effort.
+
+For this test:
+
+    test.print('incremental', function (t) {
+      t.table_assert(
+        [
+          [ 'input'              , 'exp'                                               ],
+          [ '"abc", '            , [ 'B@0,S5@0,E@7', '0.7/-/B_V/null' ]                ],
+          [ '['                  , [ 'B@0,[@0,E@1', '0.1/[/BFV/null' ]                 ],
+          [ '[ 83 '              , [ '[@0,N2@2,E@5', '0.5/[/A_V/null' ]                ],
+          [ '[ 83 ,'             , [ '[@0,N2@2,E@6', '0.6/[/B_V/null' ]                ],
+          [ '[ 83 , "a"'         , [ 'N2@2,S3@7,E@10', '0.10/[/A_V/null' ]             ],
+          [ '[ 83 , "a",'        , [ 'N2@2,S3@7,E@11', '0.11/[/B_V/null' ]             ],
+          ...
+          [ '{ "a": 93, "b": []' , [ 'K3@11:[@16,]@17,E@18', '0.18/{/A_V/null' ]       ],
+          [ '{ "a": 93, "b": [] ', [ 'K3@11:[@16,]@17,E@19', '0.19/{/A_V/null' ]       ],
+        ],
+        function (src) {
+          var hector = t.hector()
+          var cb = function (src, koff, klim, tok, voff, vlim, info) {
+            hector(koff, klim, tok, voff, vlim, info)
+            return true
+          }
+          var info = jtok.tokenize(utf8.buffer(src), {incremental: true}, cb)
+          var argstr = hector.args.map(function (args) { return jtok.args2str.apply(null, args) }).slice(-3).join(',')
+          return [ argstr, info.toString() ]
+        }
+      )
+    })
+
+
+I simply change the first line:
+
+    test('incremental', function (t) {
+
+to: 
+
+    test.print('incremental', function (t) {
+
+
+and the table prints itself out with new assertions in the last column.  Paste it in and check the diff...
+and i'm on to more exciting things.  Enjoy!
+
+**One caveat** - while print handles strings, numbers, objects, arrays, booleans... quite nicely, the 
+table has to be full of these basic things to do what you want.  If your table is using many variables to 
+complex data, then it won't be fun for you... and neither will inspections/debugging, imho, but that's something
+to keep in mind.
+
+
 
 ## test.only()
 
