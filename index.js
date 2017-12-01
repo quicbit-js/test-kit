@@ -170,11 +170,6 @@ function table_assert (torig, tnew) {
   return function (dataOrTable, fn, opt) {
     fn && typeof fn === 'function' || err('invalid function argument: ' + fn)
     opt = assign({}, {assert: 'same'}, opt)
-    if (opt.plan == null) {
-      opt.plan = (!tnew.planned_tests && opt.assert !== 'none') ? 1 : 0
-    } else {
-      opt.plan === 0 || !tnew.planned_tests || err('plan has already been set: ' + tnew.planned_tests)
-    }
 
     if (tnew.tk_props.print_mode) {
       print_table(tnew, dataOrTable, fn, opt)
@@ -185,6 +180,12 @@ function table_assert (torig, tnew) {
 }
 
 function assert_table(tnew, dataOrTable, fn, opt) {
+  if (opt.plan == null) {
+      opt.plan = (!tnew.planned_tests && opt.assert !== 'none') ? 1 : 0
+  } else {
+      opt.plan === 0 || !tnew.planned_tests || err('plan has already been set: ' + tnew.planned_tests)
+  }
+
   var tbl = tnew.table(dataOrTable)
   if (opt.plan) {      // non-zero
     var plan_total
@@ -387,6 +388,23 @@ function desc (lbl, inp, out) {
   return lbl + ': ' + parens(inp) + ' -expect-> ' + parens([out])
 }
 
+function tkprop (torig, tnew) {
+  return function () {
+    var k = arguments[0]
+    switch (arguments.length) {
+      case 0: return
+      case 1: return tnew.tk_props[k]
+      default:
+        var v = arguments[1]
+        if (v == null) {
+          delete tnew.tk_props[k]
+        } else {
+          tnew.tk_props[k] = v
+        }
+        return
+    }
+  }
+}
 // Creation functions are passed the original test object and the new test
 // object so they may invoke new or prior-defined functions (delegate).
 
@@ -405,6 +423,7 @@ var DEFAULT_FUNCTIONS = {
   table: function ()                   { return table },
   tableAssert: function (torig, tnew)  { return table_assert(torig, tnew) },  // backward-compatibility
   table_assert: function (torig, tnew) { return table_assert(torig, tnew) },
+  tkprop: function (torig, tnew)       { return tkprop(torig, tnew) },
   trunc: function ()                   { return trunc },
   type: function ()                    { return type },
   utf8: function ()                    { return require('qb-utf8-ez').buffer },
