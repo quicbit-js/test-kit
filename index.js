@@ -1,9 +1,10 @@
 var assign = require('qb-assign')
+var jstr = require('qb-js-string')
 
 // collects test argument and executes them later (on timeout) according to whether 'only'
 // was called or not.
 function TestRunner (test_fn, enrich_fns) {
-  this.args = []
+  this.inputs = []          // array of { args: [...], tk_props: { ... } }
   this.only_called = false
   this.running = false
   this.test_fn = test_fn
@@ -16,24 +17,25 @@ TestRunner.prototype = {
     var self = this
     setTimeout(function () {
       self.running = true
-      self.args.forEach(function (a) {
-        self.test_fn.apply(null, enrich_test_arguments(a, self.enrich_fns))
+      self.inputs.forEach(function (input) {
+        self.test_fn.apply(null, enrich_test_arguments(input.args, self.enrich_fns, input.tk_props))
       })
     })
   },
-  addTest: function (args, only) {
+  addTest: function (args, tk_props) {
     if (this.running) {
       throw Error('cannot add test - already running')
     }
-    if (only) {
+    var input = { args: args, tk_props: tk_props }
+    if (tk_props.only) {
       if (this.only_called) {
         throw Error('there can only be one only test')
       }
       this.only_called = true
-      this.args = [args]
+      this.inputs = [input]
     } else {
       if (!this.only_called) {
-        this.args.push(args)
+        this.inputs.push(input)
       }
     }
   }
@@ -43,20 +45,22 @@ TestRunner.prototype = {
 //
 //      test('mytest', function(t) {...} )
 //
-function enrich_test_arguments (args, enrich_fns) {
+// tk_props (optional) is added to the enriched function as '_tk_props' - for use by other functions (test modes)
+//
+function enrich_test_arguments (args, enrich_fns, tk_props) {
   args = Array.prototype.slice.call(args)
   var fi = args.findIndex(function (a) { return typeof (a) === 'function' })
-  args[fi] = enrich_t(args[fi], enrich_fns)
+  args[fi] = enrich_t(args[fi], enrich_fns, tk_props)
   return args
 }
 
 // enrich the test or 't' object by applying transforms in enrich_fns
 // 'fn' is the user function that we will call with the new enriched 't':  fn(t)
-function enrich_t (fn, enrich_fns) {
+function enrich_t (fn, enrich_fns, tk_props) {
   return function (torig) {
     var tnew = Object.create(torig)
-    var funcnames = Object.keys(enrich_fns)
-    funcnames.forEach(function (n) { tnew[n] = enrich_fns[n](torig, tnew) })
+    Object.keys(enrich_fns).forEach(function (n) { tnew[n] = enrich_fns[n](torig, tnew) })
+    tnew.tk_props = tk_props
     fn(tnew)
   }
 }
@@ -165,50 +169,80 @@ function table (data) {
 function table_assert (torig, tnew) {
   return function (dataOrTable, fn, opt) {
     fn && typeof fn === 'function' || err('invalid function argument: ' + fn)
-    opt = assign({}, opt)
-    var assert = opt.assert || 'same'
-
-    var tbl = tnew.table(dataOrTable)
-
+    opt = assign({}, {assert: 'same'}, opt)
     if (opt.plan == null) {
-      opt.plan = (!tnew.planned_tests && assert !== 'none') ? 1 : 0
+      opt.plan = (!tnew.planned_tests && opt.assert !== 'none') ? 1 : 0
     } else {
       opt.plan === 0 || !tnew.planned_tests || err('plan has already been set: ' + tnew.planned_tests)
     }
 
-    if (opt.plan) {      // non-zero
-      var plan_total
-      if (typeof opt.plan === 'string') {
-        plan_total = tnew.sum(tbl.vals(opt.plan))
-      } else {
-        plan_total = tbl.length * opt.plan
-      }
-      tnew.plan(plan_total)   // sets planned_tests, which cannot be changed
+    if (tnew.tk_props.print_mode) {
+      print_table(tnew, dataOrTable, fn, opt)
+    } else {
+      assert_table(tnew, dataOrTable, fn, opt)
     }
-
-    tbl.rows.forEach(function (r) {
-      var vals = r._vals
-      var exp_val
-      if (assert === 'none') {
-        if (opt.trunc) { vals = tnew.trunc(vals) }
-        fn.apply(null, vals)
-      } else {
-        vals = vals.slice()
-        exp_val = vals.pop()
-        if (opt.trunc) { vals = tnew.trunc(vals) }
-        if (assert === 'throws') {
-          tnew.throws(function () { fn.apply(null, vals) }, exp_val, tnew.desc('', vals, exp_val.toString()))
-        } else {
-          tnew[assert](fn.apply(null, vals), exp_val, tnew.desc('', vals, exp_val))
-        }
-      }
-    })
   }
 }
 
-function err (msg) {
-  throw Error(msg)
+function assert_table(tnew, dataOrTable, fn, opt) {
+  var tbl = tnew.table(dataOrTable)
+  if (opt.plan) {      // non-zero
+    var plan_total
+    if (typeof opt.plan === 'string') {
+      plan_total = tnew.sum(tbl.vals(opt.plan))
+    } else {
+      plan_total = tbl.length * opt.plan
+    }
+    tnew.plan(plan_total)   // sets planned_tests, which cannot be changed
+  }
+
+  tbl.rows.forEach(function (r) {
+    var vals = r._vals
+    var exp_val
+    if (opt.assert === 'none') {
+      if (opt.trunc) { vals = tnew.trunc(vals) }
+      fn.apply(null, vals)
+    } else {
+      vals = vals.slice()
+      exp_val = vals.pop()
+      if (opt.trunc) { vals = tnew.trunc(vals) }
+      if (opt.assert === 'throws') {
+        tnew.throws(function () { fn.apply(null, vals) }, exp_val, tnew.desc('', vals, exp_val.toString()))
+      } else {
+        tnew[opt.assert](fn.apply(null, vals), exp_val, tnew.desc('', vals, exp_val))
+      }
+    }
+  })
 }
+
+// same signature as table_assert, but pretty-print the table with results instead of running assertions
+function print_table (tnew, dataOrTable, fn, opt) {
+  var out = opt.print_out || console.log
+
+  var tbl = tnew.table(dataOrTable)
+
+  if (opt.assert === 'same' || opt.assert === 'equal') {
+    var last_header = tbl.header[tbl.header.length - 1]
+    // replace last column with results of output from first cols
+    tbl.rows.forEach(function (row) {
+      var vals = row._vals
+      if (opt.trunc) { vals = tnew.trunc(vals) }
+        row[last_header] = fn.apply(null, vals)
+    })
+  } // else just format all cols (we can add special assert handling as needed)
+
+  var as_arrays = [tbl.header].concat(tbl.data)
+  out('PRINT TABLE:')
+  out(jstr.table(as_arrays))
+
+  if (!opt.print_out) {
+    // if print out is set, then assume caller is doing the assertions.
+    tnew.ok(1, 'print table finished')
+    tnew.end()
+  }
+}
+
+function err (msg) { throw Error(msg) }
 
 function type (v) {
   var ret = Object.prototype.toString.call(v)
@@ -378,9 +412,7 @@ var DEFAULT_FUNCTIONS = {
 }
 
 function testfn (name_or_fn, custom_fns, opt) {
-  opt = opt || {custom_only: false}
-  var enrich_fns = assign({}, opt.custom_only ? {} : DEFAULT_FUNCTIONS, custom_fns)
-  var ret
+  opt = opt || {}
 
   var test_orig = name_or_fn
   if (typeof name_or_fn === 'string') {
@@ -392,15 +424,18 @@ function testfn (name_or_fn, custom_fns, opt) {
     }
   }
   typeof test_orig === 'function' || err(name_or_fn + ' is not a function')
-  if (test_orig.only) {
-    ret = function () { return test_orig.apply(null, enrich_test_arguments(arguments, enrich_fns)) }
-    ret.only = function () { return test_orig.only.apply(null, enrich_test_arguments(arguments, enrich_fns)) }
-  } else {
-    var runner = new TestRunner(test_orig, enrich_fns)
-    ret = function () { runner.addTest(arguments, false) }
-    ret.only = function () { runner.addTest(arguments, true) }
-    runner.run()
+
+  var enrich_fns = assign({}, opt.custom_only ? {} : DEFAULT_FUNCTIONS, custom_fns)
+  var ret
+
+  var runner = new TestRunner(test_orig, enrich_fns)
+  ret = function () { runner.addTest(arguments, {}) }
+  ret.only = function () { runner.addTest(arguments, {only: true}) }
+  ret.print = function () {
+    runner.addTest(arguments, {only: true, print_mode: true})
   }
+  runner.run()
+
   ret.engine = test_orig.only && test_orig.onFinish ? 'tape' : 'tap'  // just a guess by what is likely
   Object.keys(test_orig).forEach(function (k) {
     if (!ret[k]) {
