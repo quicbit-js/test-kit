@@ -514,25 +514,28 @@ This was the test that pushed me over the edge.  It's a JSON parse module called
 that saves detailed
 information for incremental parsing and recovery:
 
-      [ 'input'              , 'exp'                                               ],
-      [ '"abc", '            , [ 'B@0,S5@0,E@7', '0.7/-/B_V/null' ]                ],
-      [ '['                  , [ 'B@0,[@0,E@1', '0.1/[/BFV/null' ]                 ],
-      [ '[ 83 '              , [ '[@0,N2@2,E@5', '0.5/[/A_V/null' ]                ],
-      [ '[ 83 ,'             , [ '[@0,N2@2,E@6', '0.6/[/B_V/null' ]                ],
-      [ '[ 83 , "a"'         , [ 'N2@2,S3@7,E@10', '0.10/[/A_V/null' ]             ],
-      [ '[ 83 , "a",'        , [ 'N2@2,S3@7,E@11', '0.11/[/B_V/null' ]             ],
-      [ '[ 83 , "a", 2'      , [ 'N2@2,S3@7,E@12', '0.13/[/B_V/2' ]                ],
-      [ '{'                  , [ 'B@0,{@0,E@1', '0.1/{/BFK/null' ]                 ],
-      [ '{ "a"'              , [ 'B@0,{@0,K3@2:E@5', '0.5/{/A_K/null' ]            ],
-      [ '{ "a":'             , [ 'B@0,{@0,K3@2:E@6', '0.6/{/B_V/null' ]            ],
-      [ '{ "a": 9'           , [ 'B@0,{@0,K3@2:E@7', '0.8/{/B_V/9' ]               ],
-      [ '{ "a": 93, '        , [ '{@0,K3@2:N2@7,E@11', '0.11/{/B_K/null' ]         ],
-      [ '{ "a": 93, "b'      , [ '{@0,K3@2:N2@7,E@11', '0.13/{/B_K/"b' ]           ],
-      [ '{ "a": 93, "b"'     , [ '{@0,K3@2:N2@7,K3@11:E@14', '0.14/{/A_K/null' ]   ],
-      [ '{ "a": 93, "b":'    , [ '{@0,K3@2:N2@7,K3@11:E@15', '0.15/{/B_V/null' ]   ],
-      [ '{ "a": 93, "b": ['  , [ 'K3@2:N2@7,K3@11:[@16,E@17', '0.17/{[/BFV/null' ] ],
-      [ '{ "a": 93, "b": []' , [ 'K3@11:[@16,]@17,E@18', '0.18/{/A_V/null' ]       ],
-      [ '{ "a": 93, "b": [] ', [ 'K3@11:[@16,]@17,E@19', '0.19/{/A_V/null' ]       ],
+    test('incremental', function (t) {
+      t.table_assert(
+        [
+          [ 'input',               'exp'                                               ],
+          [ '"abc", ',             [ 'B@0,S5@0,E@7', '0.7/-/B_V/null' ]                ],
+          [ '[',                   [ 'B@0,[@0,E@1', '0.1/[/BFV/null' ]                 ],
+          [ '[ 83 ',               [ '[@0,N2@2,E@5', '0.5/[/A_V/null' ]                ],
+          [ '[ 83 ,',              [ '[@0,N2@2,E@6', '0.6/[/B_V/null' ]                ],
+          [ '[ 83 , "a"',          [ 'N2@2,S3@7,E@10', '0.10/[/A_V/null' ]             ],
+          [ '[ 83 , "a",',         [ 'N2@2,S3@7,E@11', '0.11/[/B_V/null' ]             ],
+          [ '[ 83 , "a", 2',       [ 'N2@2,S3@7,E@12', '0.13/[/B_V/2' ]                ],
+          [ '{',                   [ 'B@0,{@0,E@1', '0.1/{/BFK/null' ]                 ],
+          [ '{ "a"',               [ 'B@0,{@0,K3@2:E@5', '0.5/{/A_K/null' ]            ],
+          [ '{ "a":',              [ 'B@0,{@0,K3@2:E@6', '0.6/{/B_V/null' ]            ],
+          [ '{ "a": 9',            [ 'B@0,{@0,K3@2:E@7', '0.8/{/B_V/9' ]               ],
+          [ '{ "a": 93, ',         [ '{@0,K3@2:N2@7,E@11', '0.11/{/B_K/null' ]         ],
+          [ '{ "a": 93, "b',       [ '{@0,K3@2:N2@7,E@11', '0.13/{/B_K/"b' ]           ],
+          [ '{ "a": 93, "b"',      [ '{@0,K3@2:N2@7,K3@11:E@14', '0.14/{/A_K/null' ]   ],
+          [ '{ "a": 93, "b":',     [ '{@0,K3@2:N2@7,K3@11:E@15', '0.15/{/B_V/null' ]   ],
+          [ '{ "a": 93, "b": [',   [ 'K3@2:N2@7,K3@11:[@16,E@17', '0.17/{[/BFV/null' ] ],
+          [ '{ "a": 93, "b": []',  [ 'K3@11:[@16,]@17,E@18', '0.18/{/A_V/null' ]       ],
+          [ '{ "a": 93, "b": [] ', [ 'K3@11:[@16,]@17,E@19', '0.19/{/A_V/null' ]       ],
       ...
 
 Lot's of dense output for parsing.  With every enrichment of information, I had to edit multiple 
@@ -542,41 +545,18 @@ only the assertions in that test.  If there is a table_assert, it will pretty-pr
 in javascript so you can verify and paste the whole table in if you like to save yourself from
 of tedious effort.
 
-For this test:
+For a test like this:
 
-    test.print('incremental', function (t) {
+    test('incremental', function (t) {
       t.table_assert(
         [
           [ 'input'              , 'exp'                                               ],
           [ '"abc", '            , [ 'B@0,S5@0,E@7', '0.7/-/B_V/null' ]                ],
           [ '['                  , [ 'B@0,[@0,E@1', '0.1/[/BFV/null' ]                 ],
-          [ '[ 83 '              , [ '[@0,N2@2,E@5', '0.5/[/A_V/null' ]                ],
-          [ '[ 83 ,'             , [ '[@0,N2@2,E@6', '0.6/[/B_V/null' ]                ],
-          [ '[ 83 , "a"'         , [ 'N2@2,S3@7,E@10', '0.10/[/A_V/null' ]             ],
-          [ '[ 83 , "a",'        , [ 'N2@2,S3@7,E@11', '0.11/[/B_V/null' ]             ],
           ...
-          [ '{ "a": 93, "b": []' , [ 'K3@11:[@16,]@17,E@18', '0.18/{/A_V/null' ]       ],
-          [ '{ "a": 93, "b": [] ', [ 'K3@11:[@16,]@17,E@19', '0.19/{/A_V/null' ]       ],
-        ],
-        function (src) {
-          var hector = t.hector()
-          var cb = function (src, koff, klim, tok, voff, vlim, info) {
-            hector(koff, klim, tok, voff, vlim, info)
-            return true
-          }
-          var info = jtok.tokenize(utf8.buffer(src), {incremental: true}, cb)
-          var argstr = hector.args.map(function (args) { return jtok.args2str.apply(null, args) }).slice(-3).join(',')
-          return [ argstr, info.toString() ]
-        }
-      )
-    })
 
 
-I simply change the first line:
-
-    test('incremental', function (t) {
-
-to: 
+Simply change the first line to:
 
     test.print('incremental', function (t) {
 
