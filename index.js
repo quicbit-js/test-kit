@@ -171,22 +171,27 @@ function table_assert (torig, tnew) {
     fn && typeof fn === 'function' || err('invalid function argument: ' + fn)
     opt = assign({}, {assert: 'same'}, opt)
 
-    if (tnew.tk_props.print_mode) {
-      print_table(tnew, dataOrTable, fn, opt)
+    var tbl = tnew.table(dataOrTable)
+    var tp = tnew.tk_props
+
+    if (tp.trows) {
+      tbl = tbl.trows.apply(tbl, tp.trows)
+    }
+    if (tp.print_mode) {
+      print_table(tnew, tbl, fn, opt)
     } else {
-      assert_table(tnew, dataOrTable, fn, opt)
+      assert_table(tnew, tbl, fn, opt)
     }
   }
 }
 
-function assert_table(tnew, dataOrTable, fn, opt) {
+function assert_table(tnew, tbl, fn, opt) {
   if (opt.plan == null) {
       opt.plan = (!tnew.planned_tests && opt.assert !== 'none') ? 1 : 0
   } else {
       opt.plan === 0 || !tnew.planned_tests || err('plan has already been set: ' + tnew.planned_tests)
   }
 
-  var tbl = tnew.table(dataOrTable)
   if (opt.plan) {      // non-zero
     var plan_total
     if (typeof opt.plan === 'string') {
@@ -217,10 +222,8 @@ function assert_table(tnew, dataOrTable, fn, opt) {
 }
 
 // same signature as table_assert, but pretty-print the table with results instead of running assertions
-function print_table (tnew, dataOrTable, fn, opt) {
+function print_table (tnew, tbl, fn, opt) {
   var out = opt.print_out || console.log
-
-  var tbl = tnew.table(dataOrTable)
 
   if (opt.assert === 'same' || opt.assert === 'equal') {
     var last_header = tbl.header[tbl.header.length - 1]
@@ -450,9 +453,8 @@ function testfn (name_or_fn, custom_fns, opt) {
   var runner = new TestRunner(test_orig, enrich_fns)
   ret = function () { runner.addTest(arguments, {}) }
   ret.only = function () { runner.addTest(arguments, {only: true}) }
-  ret.print = function () {
-    runner.addTest(arguments, {only: true, print_mode: true})
-  }
+  ret.print = function () { runner.addTest(arguments, {only: true, print_mode: true}) }
+  ret.only1 = function () { runner.addTest(arguments, {only: true, trows: [0,1] })}
   runner.run()
 
   ret.engine = test_orig.only && test_orig.onFinish ? 'tape' : 'tap'  // just a guess by what is likely

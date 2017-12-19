@@ -587,6 +587,40 @@ in tape
 ... will only run the one test, regardless of how many others are in the file.
 
 
+## test.only1()
+
+"There can be only one".
+
+Going even beyond the convenience of test.only(), test.only1() tests only the first row in any given
+test table.  Very useful for honing in on a single problem:
+
+    test.only1('types', (t) => {
+        t.table_assert([
+            [ 'v',       'exp'       ],
+            [ 1,         'number'    ],
+            [ null,      'null'      ],
+            [ undefined, 'undefined' ],
+            [ [1, 2],    'array'     ],
+        ], t.type)
+    })
+    
+... Will only run the first row test <code>[ 1, 'number' ]</code>, setting t.plan(1) etc.
+
+In combination with an editor that comments out lines, we can very quickly isolate and run one test.  For
+example:
+
+    test.only1('types', (t) => {
+        t.table_assert([
+            [ 'v',       'exp'       ],
+    //        [ 1,         'number'    ],
+    //        [ null,      'null'      ],
+            [ undefined, 'undefined' ],
+            [ [1, 2],    'array'     ],
+        ], t.type)
+    })
+
+... runs the <code>[ undefined, undefined ]</code> test and nothing else.
+
 # Understanding and Extending test-kit
 
 For transparency and to help developers understand how the package works,
