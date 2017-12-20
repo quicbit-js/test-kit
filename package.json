@@ -8,7 +8,7 @@
   "repository": "quicbit-js/test-kit",
   "dependencies": {
     "qb-assign": "^1.0.1",
-    "qb-js-string": "^1.1.0",
+    "qb-js-string": "^1.1.2",
     "qb-utf8-ez": "3.0.2",
     "test-table": "^2.3.0"
   },
