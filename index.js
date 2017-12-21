@@ -94,34 +94,7 @@ function parens (args) {
   return '(' + ret.substr(1, ret.length - 2) + ')'
 }
 
-// function escape_re(s) {
-//     s = s.replace(/[-[\]{}()+?.,\\^$|#]/g, '\\$&')  // escape everything except '*'
-//     return s.replace(/[*]/g, '.*')
-// }
-
-// Easy capture of formatted text into string-array.
-//
-// Given a string, return an array of strings trimming start and end blank lines but preserving
-// interim blank lines and relative space-indentation.  (using first space-indented line as the minimum indent).
-// t.lines(`
-//
-//      some text
-//
-//      that is formatted
-//         with some indentation
-//      on some lines
-//
-// `)
-//
-// ... gives:
-// [
-//      'some text',
-//      '',
-//      'that is formatted',
-//      '   with some indentation',
-//      'on some lines',
-// ]
-//
+function last (a) { return a[a.length - 1] }
 function text_lines (s) {
   var lines = s.split('\n')
 
@@ -417,6 +390,7 @@ var DEFAULT_FUNCTIONS = {
   hector: function ()                  { return hector },
   imatch: function ()                  { return imatch },
   ireplace: function ()                { return ireplace },
+  last: function ()                    { return last },
   lines: function ()                   { return text_lines },
   padl: function ()                    { return padl },
   padr: function ()                    { return padr },

@@ -74,6 +74,15 @@ function test_defaults (test) {
         ], t.sum)
     })
 
+    test(test.engine + ': last', (t) => {
+        t.table_assert([
+            [ 'a',   'exp' ],
+            [ [],    undefined ],
+            [ [1],   1 ],
+            [ [1,2], 2 ],
+        ], t.last )
+    })
+
     test(test.engine + ': table_assert - auto-plan', (t) => {
         let tbl = t.table([
             ['a', 'b', 'exp'],

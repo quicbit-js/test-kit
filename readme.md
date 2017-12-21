@@ -22,7 +22,7 @@
 An improved data-driven test experience using [tap][tap-link] or [tape][tape-link].
 
 Enriches tape or tap (your choice) with productivity functions.  Most notable is
-tableAssert(), which shows coverage cases more clearly and improves test output as well.
+table_assert(), which shows coverage cases more clearly and improves test output as well.
 
 test-kit adds new functions to the callback argument 
 (named 't', below), where they are most accessible in your tests.  
@@ -102,10 +102,9 @@ This example comes directly from default-function-tests.js included with the pac
 Representing data in tabular form can make it easier to create comprehensive 
 coverage and highlight the test variations.
 
-## t.table_assert() and t.tableAssert()
+## t.table_assert ()
 
     t.table_assert(table_or_data, fn, options)
-    t.tableAssert(table_or_data, fn, options)   // same function - if you prefer pascalCase
     
 Instead of: 
 
@@ -131,7 +130,7 @@ used as inputs to illegal(), the 'expect' column is asserted to be deepEqual to 
     var illegal = require('qb-utf8-illegal-bytes')
     
     test('illegal', function (t) {
-      t.tableAssert([
+      t.table_assert([
         [ 'src',                         'off',  'lim',      'expect'                ],
         [ [ 167, 168, 169 ],              null,   null,      [ [0,3] ]               ],
         [ [ 167, 168, 169 ],              1,      null,      [ [1,3] ]               ],
@@ -146,7 +145,7 @@ used as inputs to illegal(), the 'expect' column is asserted to be deepEqual to 
 I find spotting and updating special test cases works better when inputs and expected output
 are laid out in table form.
     
-Using tableAssert() **also enriches the test output** so instead of:
+Using table_assert() **also enriches the test output** so instead of:
 
     # illegal
     ok 1 should be equivalent
@@ -175,7 +174,7 @@ We get:
         operator: deepEqual
         expected: [ [ 0, 1 ] ]
         actual:   [ [ 0, 2 ] ]
-        at: Test.tableAssert (/Users/dad/ghub/qb-utf8-illegal-bytes/node_modules/test-kit/index.js:171:14)
+        at: Test.table_assert (/Users/dad/ghub/qb-utf8-illegal-bytes/node_modules/test-kit/index.js:171:14)
       ...
     ok 6 : ([167,97,168,98,169],null,null) -expect-> ([[0,1],[2,3],[4,5]])
     ok 7 : ([97,98,99,167,97,98],null,null) -expect-> ([[3,4]])
@@ -240,7 +239,7 @@ As with other table tests, the test output includes revealing detail for every t
     ok 74 : ('table_assert',[[['a'],[1]],null,{'plan':3}]) -expect-> ('/plan has already been set/')
 
 
-## t.tkprop()  "get/set property"
+## t.tkprop ()  "get/set property"
 
 get or set a test-kit property on the running test.  Currently there is only one property "print_mode",
 which is truthy.
@@ -254,7 +253,7 @@ which is truthy.
     
 See test.print() for more info - (similar to the only() function)
 
-## t.desc()   "describe"
+## t.desc ()   "describe"
 
 Create **desc**riptive assertion messages with expected input/output:
 
@@ -296,7 +295,7 @@ a string using first row values as input and last value as expected output.
         })
 
 
-## t.hector()
+## t.hector ()
     Hector the Collector
     Collected bits of string...
     
@@ -312,7 +311,7 @@ The returned function has two properties:
     f.arg(name_or_number)   function returning array of arguments of the given 
                                 name (if names was used, above), or number/index.
 
-## t.count()
+## t.count ()
 
     t.count(source, value)
     
@@ -320,7 +319,7 @@ Return the number of occurrences of value in a source string, array, or uint8arr
 any-length substrings in a string, but only single bytes in a uint8array.  Uses
 String.indexOf for string checking and equivalence (===) for arrays.
     
-## t.sum()
+## t.sum ()
 
     t.sum(array, property_or_function)
 
@@ -329,7 +328,7 @@ return the sum of the results of the function applied to each array value.  If s
 argument is a string or number, return the sum of that property of all items in the 
 array.
 
-## t.trunc()
+## t.trunc ()
 
     t.trunc(a)
     
@@ -356,7 +355,7 @@ This can be helpful when using table_assert testing variable-arg functions:
     
 t.trunc() is also available as a [table_assert](#ttable_assert-and-ttableassert) option.
 
-## t.imatch()
+## t.imatch ()
 
     imatch(s, regex, options)
 
@@ -404,7 +403,7 @@ options:
 ...more examples in [default-function-tests](https://github.com/quicbit-js/test-kit/blob/master/test/default-function-tests.js)
 
 
-## t.ireplace()
+## t.ireplace ()
 
     t.ireplace(s, regex, string_or_fn, opt)
     
@@ -418,22 +417,23 @@ did not match the given regex.
 Options for controlling substrings matched and no-match handling are the same as for imatch, 
 with the exception of the 'return' option which is ignored.
 
-## t.padl( str, length, char )
+## t.padl (str, length, char)
 
 Return string <code>str</code> left-padded up to <code>length</code> characters using char as padding.
 char (defaults to single-space) can be and length-1 string.
     
-## t.padr( str, length, char )
+## t.padr (str, length, char)
 
 Return string <code>str</code> right-padded up to <code>length</code> characters using char as padding.
 char (defaults to single-space) can be and length-1 string.
     
-## t.str( value )
+## t.str (value)
 
 Returns a string representation of value.  A simple but crude string transform based on JSON.stringify()
 
 
-## t.lines( text )
+## t.last (a) 
+## t.lines (text)
 
 Easy capture of formatted text into string-array.
 
@@ -639,6 +639,7 @@ at the index.js file:
       hector: function ()                  { return hector },
       imatch: function ()                  { return imatch },
       ireplace: function ()                { return ireplace },
+      last: function ()                    { return last },
       lines: function ()                   { return text_lines },
       padl: function ()                    { return padl },
       padr: function ()                    { return padr },
@@ -648,6 +649,8 @@ at the index.js file:
       table: function ()                   { return table },
       tableAssert: function (torig, tnew)  { return table_assert(torig, tnew) },  // backward-compatibility
       table_assert: function (torig, tnew) { return table_assert(torig, tnew) },
+      tkprop: function (torig, tnew)       { return tkprop(torig, tnew) },
+      trunc: function ()                   { return trunc },
       type: function ()                    { return type },
       utf8: function ()                    { return require('qb-utf8-ez').buffer },
       utf8_to_str: function ()             { return require('qb-utf8-ez').string }
