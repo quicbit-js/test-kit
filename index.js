@@ -332,12 +332,6 @@ function ireplace (s, re, fn_or_string, opt) {
   return ret.join('')
 }
 
-// Hector the Collector
-// Collected bits of string...
-// (http://belz.net/teaching/hector.html)
-//
-// Return a callback function that collects callback arguments in the 'args' array, provides access to
-// columns of results with the arg(i) function.  also supports args('name') if names are provided.
 function hector (names) {
   var args = []
   var max_num_args = 0

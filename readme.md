@@ -296,6 +296,7 @@ a string using first row values as input and last value as expected output.
 
 
 ## t.hector ()
+
     Hector the Collector
     Collected bits of string...
     
