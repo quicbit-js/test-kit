@@ -176,7 +176,7 @@ function assert_table(tnew, tbl, fn, opt) {
   }
 
   tbl.rows.forEach(function (r) {
-    if (r._comments) {
+    if (r._comments.length) {
       r._comments.forEach(function (c) {
         console.log(c)
       })
@@ -207,7 +207,7 @@ function print_table (tnew, tbl, fn, opt) {
     var last_header = tbl.header[tbl.header.length - 1]
     // replace last column with results of output from first cols
     tbl.rows.forEach(function (row) {
-      var vals = row._vals
+      var vals = row._vals()
       if (opt.trunc) { vals = tnew.trunc(vals) }
         row[last_header] = fn.apply(null, vals)
     })
