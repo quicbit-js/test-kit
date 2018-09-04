@@ -311,16 +311,6 @@ prints:
     ok 2 checkbase: ('/a/') -expect-> ('/a')
     ok 3 checkbase: ('/a/b/') -expect-> ('/a/b')
 
-**shorter form**
-
-If input is a row object and there is no expected_output param, then return 
-a string using first row values as input and last value as expected output.
-
-        t.plan(tbl.length)
-        tbl.rows.forEach(function(r){
-            t.equal(bpath.checkbase(r.base),  r.exp, t.desc('checkbase', r))
-        })
-
 ## t.permut ()
 
 Generates every permutation of a given series (array of values).  Handy for covering all cases of some types of tests.
