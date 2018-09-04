@@ -176,7 +176,12 @@ function assert_table(tnew, tbl, fn, opt) {
   }
 
   tbl.rows.forEach(function (r) {
-    var vals = r._vals
+    if (r._comments) {
+      r._comments.forEach(function (c) {
+        console.log(c)
+      })
+    }
+    var vals = r._vals()
     var exp_val
     if (opt.assert === 'none') {
       if (opt.trunc) { vals = tnew.trunc(vals) }

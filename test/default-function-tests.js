@@ -320,6 +320,7 @@ function test_defaults (test) {
             [ 'bbb',   /b/g,      null,                      [],                    ],
             [ 'abcbb', /b/g,      null,                      ['a', 'c'],            ],
             [ 'a%b%c', /%/g,      null,                      ['a', 'b', 'c'],       ],
+            '# test options',
             [ 'abcbb', /b/g,      {return:'tuples'},         [[0,1], [2,1]],        ],
             [ 'a%b%c', /%/g,      {return:'tuples'},         [[0,1], [2,1], [4,1]], ],
             [ '',      /b/g,      {empties:'include'},       [''],                  ],
