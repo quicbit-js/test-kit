@@ -11,7 +11,7 @@ function test_defaults (test) {
             [ [1,1],           [[1,1],[1,1]] ],
             [ [1,0],           [[1,0],[0,1]] ],
             [ [1,2,3],         [ [ 1, 2, 3 ], [ 2, 1, 3 ], [ 3, 1, 2 ], [ 1, 3, 2 ], [ 2, 3, 1 ], [ 3, 2, 1 ] ] ],
-        ], t.heaps )
+        ], t.permut )
     })
 
     test(test.engine + ': count len = 1', function (t) {
