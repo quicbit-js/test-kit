@@ -80,7 +80,7 @@ to understand them and to become comfortable with defining your own.
 
 Creates a simple table for data-driven testing:
 
-    var test = require('test-kit).tape()
+    let test = require('test-kit).tape()
 
     test('test-defaults: count', function(t) {
         let tbl = t.table([
@@ -101,6 +101,33 @@ Creates a simple table for data-driven testing:
 This example comes directly from default-function-tests.js included with the package.
 Representing data in tabular form can make it easier to create comprehensive 
 coverage and highlight the test variations.
+
+
+### table comments
+
+*new feature* s of version 2.8.1, *comments* can included in tables like so:
+
+    let test = require('test-kit).tape()
+
+    test('test-defaults: count', function(t) {
+        let tbl = t.table([
+            '# Table Comment',
+            [ 's',           'v',      'exp' ],
+            [ '',            '10',      0  ],
+            [ '10',          '10',      1  ],
+            '# A Row Comment',
+            [ '101',         '10',      1  ],
+            [ '1010',        '10',      2  ],
+            [ '0100101001',  '10',      3  ],
+        ])
+        t.plan(tbl.length)
+        tbl.forEach(function(r) {
+            t.equal(t.count(r.s, r.v), r.exp)
+        })
+    })
+    
+Comments are kept internally in the table and are printed again when using the 
+handy [test.print()](#test_print) feature.
 
 ## t.table_assert ()
 

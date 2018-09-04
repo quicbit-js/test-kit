@@ -10,6 +10,7 @@ module.exports = function(test) {
             ['a', 'b',      'opt', 'exp'],
             [[], [1],       null,     [1]],
             [[1], [2, 3],   {},       [1, 2, 3]],
+            '# test reverse arguments',
             [[1], [2, 3],   {reverse: true},       [2, 3, 1]],
             [[1, 2], [],    {},        [1, 2]],
         ])
@@ -28,6 +29,7 @@ module.exports = function(test) {
             [ 'a',      'b',      'opt',             'exp' ],
             [ [],       [ 1 ],    null,              [ 1 ] ],
             [ [ 1 ],    [ 2, 3 ], {},                [ 1, 2, 3 ] ],
+            '# test reverse arguments',
             [ [ 1 ],    [ 2, 3 ], { reverse: true }, [ 2, 3, 1 ] ],
             [ [ 1, 2 ], [],       {},                [ 1, 2 ] ],
             `

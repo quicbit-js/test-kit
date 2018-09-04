@@ -208,7 +208,7 @@ function print_table (tnew, tbl, fn, opt) {
     })
   } // else just format all cols (we can add special assert handling as needed)
 
-  var as_arrays = [tbl.header].concat(tbl.data)
+  var as_arrays = tbl.as_arrays({with_comments: true})
   out('PRINT TABLE:')
   out(jstr.table(as_arrays))
 
