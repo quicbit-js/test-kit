@@ -380,6 +380,21 @@ function tkprop (torig, tnew) {
     }
   }
 }
+
+// Heap's Algorithm for generating all permutations of array 'a'
+function heaps (a) { var p = []; _heaps(a, a.length, p); return p }
+function swap(a, i, j) { var t = a[i]; a[i] = a[j]; a[j] = t }
+function _heaps(a, n, p) {
+  if (n === 1) {
+    p.push(a.slice())
+  } else {
+    for (var i = 0; i < n; i++) {
+      _heaps(a, n - 1, p)
+      swap(a, n % 2 ? 0 : i, n - 1)
+    }
+  }
+}
+
 // Creation functions are passed the original test object and the new test
 // object so they may invoke new or prior-defined functions (delegate).
 
@@ -387,6 +402,7 @@ var DEFAULT_FUNCTIONS = {
   count: function ()                   { return count },
   desc: function ()                    { return desc },
   hector: function ()                  { return hector },
+  heaps: function ()                   { return heaps },
   imatch: function ()                  { return imatch },
   ireplace: function ()                { return ireplace },
   last: function ()                    { return last },

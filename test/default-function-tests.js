@@ -4,6 +4,16 @@
 
 function test_defaults (test) {
 
+    test(test.engine + ': heaps', function (t) {
+        t.table_assert([
+            [ 'a',             'exp' ],
+            [ [1],             [[1]] ],
+            [ [1,1],           [[1,1],[1,1]] ],
+            [ [1,0],           [[1,0],[0,1]] ],
+            [ [1,2,3],         [ [ 1, 2, 3 ], [ 2, 1, 3 ], [ 3, 1, 2 ], [ 1, 3, 2 ], [ 2, 3, 1 ], [ 3, 2, 1 ] ] ],
+        ], t.heaps )
+    })
+
     test(test.engine + ': count len = 1', function (t) {
         t.table_assert([
             [ 'srctype',  'src',     'v',  'exp' ],

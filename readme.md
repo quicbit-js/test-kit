@@ -321,6 +321,13 @@ a string using first row values as input and last value as expected output.
             t.equal(bpath.checkbase(r.base),  r.exp, t.desc('checkbase', r))
         })
 
+## t.heaps ()
+
+Generates every permutation of a given series (array of values).  Handy for covering all cases of some types of tests.
+
+    t.heaps([1,2,3])
+    
+    > [ [1,2,3], [2,1,3], [3,1,2], [1,3,2], [2,3,1], [3,2,1] ]
 
 ## t.hector ()
 
