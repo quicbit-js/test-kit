@@ -78,7 +78,8 @@ to understand them and to become comfortable with defining your own.
 
 ## t.table()
 
-Creates a simple table for data-driven testing:
+Creates a simple table for data-driven testing (NOTE - you don't have to format table layout by hand!  See the 
+[test.print()](#test_print) for examples):
 
     let test = require('test-kit).tape()
 
