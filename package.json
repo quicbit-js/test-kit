@@ -1,6 +1,6 @@
 {
   "name": "test-kit",
-  "version": "2.8.4",
+  "version": "2.8.5",
   "description": "An improved data-driven test experience using tap or tape",
   "homepage": "https://github.com/quicbit-js/test-kit",
   "url": "https://github.com/quicbit-js/test-kit/issues",

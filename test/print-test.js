@@ -7,18 +7,22 @@ module.exports = function(test) {
 
     test.print('test-print: this function should run', (t) => {
         let tbl = t.table([
-            ['a', 'b',      'opt', 'exp'],
-            [[], [1],       null,     [1]],
-            [[1], [2, 3],   {},       [1, 2, 3]],
+            ['a', 'b',      'opt',              'exp'],
+            [[], [1],       null,               [1]],
+            [[1], [2, 3],   {},                 [1, 2, 3]],
             '# test reverse arguments',
-            [[1], [2, 3],   {reverse: true},       [2, 3, 1]],
-            [[1, 2], [],    {},        [1, 2]],
+            [[1], [2, 3],   {reverse: true},    [2, 3, 1]],
+            [[1, 2], [],    {},                 [1, 2]],
         ])
         var hector = t.hector()
         t.table_assert(
             tbl,
-            function (a, b, opt) {
-                return (opt && opt.reverse) ? b.concat(a) : a.concat(b)
+            function () {
+                t.same(arguments.length, 3)
+                var a = arguments[0]
+                var b = arguments[1]
+                var opt = arguments[2] || {}
+                return (opt.reverse) ? b.concat(a) : a.concat(b)
             },
             {print_out: hector}
         )
