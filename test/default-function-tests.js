@@ -4,7 +4,7 @@
 
 function test_defaults (test) {
 
-    test.print(test.engine + ': heaps', function (t) {
+    test(test.engine + ': heaps', function (t) {
         t.table_assert([
             [ 'a',            'exp' ],
             [ [ 1 ],          [ '1' ] ],
