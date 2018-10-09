@@ -383,7 +383,7 @@ function tkprop (torig, tnew) {
 }
 
 // Heap's Algorithm for generating all permutations of array 'a'
-function permut (a) { var p = []; _heaps(a, a.length, p); return p }
+function permut (a) { var p = []; _heaps(a.slice(), a.length, p); return p }
 function swap(a, i, j) { var t = a[i]; a[i] = a[j]; a[j] = t }
 function _heaps(a, n, p) {
   if (n === 1) {
