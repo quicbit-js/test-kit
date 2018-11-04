@@ -10,7 +10,7 @@
     "qb-assign": "^1.0.1",
     "qb-js-string": "^1.1.4",
     "qb-utf8-ez": "3.0.2",
-    "test-table": "^3.0.1"
+    "test-table": "^3.0.2"
   },
   "devDependencies": {
     "tap": "^12.0.1",
