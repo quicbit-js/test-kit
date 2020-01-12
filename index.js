@@ -151,7 +151,7 @@ function table_assert (torig, tnew) {
       tbl = tbl.trows.apply(tbl, tp.trows)
     }
     if (tp.print_mode) {
-      print_table(tnew, tbl, fn, opt)
+      print_table(tnew, tbl, fn, opt, tp.print_mode)
     } else {
       assert_table(tnew, tbl, fn, opt)
     }
@@ -200,7 +200,7 @@ function assert_table(tnew, tbl, fn, opt) {
 }
 
 // same signature as table_assert, but pretty-print the table with results instead of running assertions
-function print_table (tnew, tbl, fn, opt) {
+function print_table (tnew, tbl, fn, opt, print_mode) {
   var out = opt.print_out || console.log
 
   if (opt.assert === 'same' || opt.assert === 'equal') {
@@ -216,7 +216,7 @@ function print_table (tnew, tbl, fn, opt) {
 
   var as_arrays = tbl.as_arrays({with_comments: true})
   out('PRINT TABLE:')
-  out(jstr.table(as_arrays))
+  out(jstr.table(as_arrays, {lang: print_mode}))
 
   if (!opt.print_out) {
     // if print out is set, then assume caller is doing the assertions.
@@ -443,7 +443,8 @@ function testfn (name_or_fn, custom_fns, opt) {
   var runner = new TestRunner(test_orig, enrich_fns)
   ret = function () { runner.addTest(arguments, {}) }
   ret.only = function () { runner.addTest(arguments, {only: true}) }
-  ret.print = function () { runner.addTest(arguments, {only: true, print_mode: true}) }
+  ret.print = function () { runner.addTest(arguments, {only: true, print_mode: 'js'}) }
+  ret.java = function () { runner.addTest(arguments, {only: true, print_mode: 'java' }) }
   ret.only1 = function () { runner.addTest(arguments, {only: true, trows: [0,1] })}
   runner.run()
 

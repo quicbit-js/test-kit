@@ -1,11 +1,6 @@
 module.exports = function(test) {
 
-    test('test-print: this function should not run', (t) => {
-        t.plan(1)
-        t.fail('should not have run')
-    })
-
-    test.print('test-print: this function should run', (t) => {
+    test.java('test-java: this function should run', (t) => {
         let tbl = t.table([
             ['a', 'b',      'opt',              'exp'],
             [[], [1],       null,               [1]],
@@ -30,14 +25,14 @@ module.exports = function(test) {
         var exp_lines = t.lines(
             `
             PRINT TABLE:
-            [
-              [ 'a',      'b',      'opt',             'exp' ],
-              [ [],       [ 1 ],    null,              [ 1 ] ],
-              [ [ 1 ],    [ 2, 3 ], {},                [ 1, 2, 3 ] ],
-              '# test reverse arguments',
-              [ [ 1 ],    [ 2, 3 ], { reverse: true }, [ 2, 3, 1 ] ],
-              [ [ 1, 2 ], [],       {},                [ 1, 2 ] ],
-            ]
+            a(
+                a( "a",       "b",       "opt",              "exp" ),
+                a( a(),       a( 1 ),    null,               a( 1 ) ),
+                a( a( 1 ),    a( 2, 3 ), o(),                a( 1, 2, 3 ) ),
+                "# test reverse arguments",
+                a( a( 1 ),    a( 2, 3 ), o( reverse, true ), a( 2, 3, 1 ) ),
+                a( a( 1, 2 ), a(),       o(),                a( 1, 2 ) )
+            );
             `
         )
         t.same(out_lines, exp_lines)
@@ -61,18 +56,18 @@ module.exports = function(test) {
         exp_lines = t.lines(
             `
             PRINT TABLE:
-            [
-              [ 's',          'v',    'expect' ],
-              [ '',           '10',   0 ],
-              [ '10',         '10',   1 ],
-              [ '101',        '10',   1 ],
-              [ '1010',       '10',   2 ],
-              [ '0100101001', '0',    6 ],
-              [ '0100101001', '1',    4 ],
-              [ '0100101001', '10',   3 ],
-              [ '0100101001', '100',  2 ],
-              [ '0100101001', '1000', 0 ],
-            ]
+            a(
+                a( "s",          "v",    "expect" ),
+                a( "",           "10",   0 ),
+                a( "10",         "10",   1 ),
+                a( "101",        "10",   1 ),
+                a( "1010",       "10",   2 ),
+                a( "0100101001", "0",    6 ),
+                a( "0100101001", "1",    4 ),
+                a( "0100101001", "10",   3 ),
+                a( "0100101001", "100",  2 ),
+                a( "0100101001", "1000", 0 )
+            );
             `
         )
         t.same(out_lines, exp_lines)

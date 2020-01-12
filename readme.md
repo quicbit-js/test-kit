@@ -581,12 +581,42 @@ and the table prints itself out with new assertions in the last column.  Paste i
 and i'm on to more exciting things.  Enjoy!
 
 **One caveat** - while print handles strings, numbers, objects, arrays, booleans... quite nicely, the 
-table has to be full of these basic things to do what you want.  If your table is using many variables to 
-complex data, then it won't be fun for you... and neither will inspections/debugging, imho, but that's something
-to keep in mind.
+table has to be full of these basic things to do what you want.  If your table input consists of 
+complex data, then print won't be fun for you... and neither will many other tasks like inspections/debugging, etc.
 
+**see also test.java()**
 
+## test.java() 
 
+Prints out test table in a format supported by java test-kit to run the same table of test assertions in JAVA.
+
+    test.java('incremental', function (t) {
+      t.table_assert(
+        [
+          [ 'input',   'exp' ],
+          [ '"abc", ', [ 'B@0,S5@0,E@7', '0.7/-/B_V/null' ] ],
+          [ '[',       [ 'B@0,[@0,E@1', '0.1/[/BFV/null' ] ],
+          ...
+
+... creates this output that can be pasted into a java test:
+
+    a(
+        a( "input",     "exp" ),
+        a( "\"abc\", ", a( "B@0,S5@0,E@7", "0.7/-/B_V/null" ) ),
+        a( "[",         a( "B@0,[@0,E@1", "0.1/[/BFV/null" ) ),
+        ...
+    );
+
+Use of double-quotes and quote escapes for strings is handled.  <code>a(...)</code> used to declare arrays.
+<code>o(...)</code> would be used for objects.  These correspond to the java static TestKit functions to 
+make working with embeded tables simple and as much like the javascript tables as possible.  This can be 
+a nice alternative to applying complex comprehensive assertion data in test-kit tested libraries ported into Java
+functions. 
+
+The TestKit java functions are much lighter weight and much less invasive than fancier data table solutions 
+such as Groovy/Spock. Testing with Java TestKit puts no constraints or heavy install requirements on your team
+since it consists only of some functions to import.
+    
 ## test.only()
 
 We liked it in [tape](https://github.com/substack/tape), so now it is available with 
