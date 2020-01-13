@@ -616,6 +616,10 @@ functions.
 The TestKit java functions are much lighter weight and much less invasive than fancier data table solutions 
 such as Groovy/Spock. Testing with Java TestKit puts no constraints or heavy install requirements on your team
 since it consists only of some functions to import.
+
+Using JUnit and TestKit also has substantially faster startup time than Groovy/Spock. Tests kick in a second
+or so allowing fast test/trial iterations similar to that with javascript, which I find personally to make an 
+impact on productivity.
     
 ## test.only()
 
