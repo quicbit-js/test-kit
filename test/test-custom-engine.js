@@ -25,6 +25,7 @@ var test = require('..').tape()
 
 
 test('other-engine', function(t) {
+    t.plan(4)
     var log     // set to t.hector() instances to check output
     function my_tap_engine() {
         log('TAP version 0')
@@ -179,5 +180,4 @@ test('other-engine', function(t) {
         ])
     })
 
-    t.end()
 })

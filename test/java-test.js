@@ -26,12 +26,12 @@ module.exports = function(test) {
             `
             PRINT TABLE:
             a(
-                a( "a",       "b",       "opt",              "exp" ),
-                a( a(),       a( 1 ),    null,               a( 1 ) ),
-                a( a( 1 ),    a( 2, 3 ), o(),                a( 1, 2, 3 ) ),
+                a( "a",       "b",       "opt",                "exp" ),
+                a( a(),       a( 1 ),    null,                 a( 1 ) ),
+                a( a( 1 ),    a( 2, 3 ), o(),                  a( 1, 2, 3 ) ),
                 "# test reverse arguments",
-                a( a( 1 ),    a( 2, 3 ), o( reverse, true ), a( 2, 3, 1 ) ),
-                a( a( 1, 2 ), a(),       o(),                a( 1, 2 ) )
+                a( a( 1 ),    a( 2, 3 ), o( \"reverse\", true ), a( 2, 3, 1 ) ),
+                a( a( 1, 2 ), a(),       o(),                  a( 1, 2 ) )
             );
             `
         )
