@@ -19,10 +19,11 @@ var jstr = require('qb-js-string')
 
 // collects test argument and executes them later (on timeout) according to whether 'only'
 // was called or not.
-function TestRunner (test_fn, enrich_fns) {
+function TestRunner (test_module, test_fn, enrich_fns) {
   this.inputs = []          // array of { args: [...], tk_props: { ... } }
   this.only_called = false
   this.running = false
+  this.test_module = test_module
   this.test_fn = test_fn
   this.enrich_fns = assign({}, enrich_fns)
 }
@@ -34,7 +35,7 @@ TestRunner.prototype = {
     setTimeout(function () {
       self.running = true
       self.inputs.forEach(function (input) {
-        self.test_fn.apply(null, enrich_test_arguments(input.args, self.enrich_fns, input.tk_props))
+        self.test_fn.apply(self.test_module, enrich_test_arguments(input.args, self.enrich_fns, input.tk_props))
       })
     })
   },
@@ -442,21 +443,24 @@ var DEFAULT_FUNCTIONS = {
 function testfn (name_or_fn, custom_fns, opt) {
   opt = opt || {}
 
+  var test_module = null
   var test_orig = name_or_fn
   if (typeof name_or_fn === 'string') {
     try {
-      test_orig = require(name_or_fn).test
+      test_module = require(name_or_fn)
+      test_orig = test_module.test
     } catch(e) {
       var suggest = (typeof custom_fns === 'function') ? ' (It looks like the call to tape or tap was left out as in "require(\'test-kit\').tape()")' : ''
       err('could not load ' + name_or_fn + suggest + ': ' + e)
     }
   }
+  // it isn't clear that passing in a test function is being used anywhere - consider deprecation and removal
   typeof test_orig === 'function' || err(name_or_fn + ' is not a function')
 
   var enrich_fns = assign({}, opt.custom_only ? {} : DEFAULT_FUNCTIONS, custom_fns)
   var ret
 
-  var runner = new TestRunner(test_orig, enrich_fns)
+  var runner = new TestRunner(test_module, test_orig, enrich_fns)
   ret = function () { runner.addTest(arguments, {}) }
   ret.only = function () { runner.addTest(arguments, {only: true}) }
   ret.print = function () { runner.addTest(arguments, {only: true, print_mode: 'js'}) }

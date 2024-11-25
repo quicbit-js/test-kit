@@ -16,8 +16,8 @@
     "test-table": "^3.0.3"
   },
   "devDependencies": {
-    "tap": "^16.3.6",
-    "tape": "^5.6.3"
+    "tap": "^21.0.1",
+    "tape": "^5.9.0"
   },
   "scripts": {
     "test": "tape test/test-*.js",
